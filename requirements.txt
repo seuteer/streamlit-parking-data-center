@@ -2,4 +2,3 @@ streamlit
 streamlit_lottie
 requests
 pillow
-json
