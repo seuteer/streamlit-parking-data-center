@@ -11,7 +11,11 @@ https://www.w3schools.com/howto/howto_css_contact_form.asp  # 表单的css代码
 
 https://share.streamlit.io/  # 云端streamlit服务器
 
+## 本地端口运行
 
+```shell
+streamlit run app.py
+```
 
 ## 上传到github
 

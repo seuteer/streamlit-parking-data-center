@@ -23,8 +23,7 @@ def load_css(css_file):
 
 
 def app():
-
-    # 加载各类元素
+    # 加载资源
     load_css('style/style.css')
     # lottie_url = 'https://assets5.lottiefiles.com/private_files/lf30_rg5wrsf4.json'
     # lottie_logo = load_lottie(lottie_url)   # 从 url 获取 json 文件，受限于网速
@@ -34,23 +33,25 @@ def app():
     img_bg_qyqx = Image.open('images/bg_千与千寻.jpg')
     img_bg_welt = Image.open('images/bg_薇尔莉特.jpg')
 
-    # Part 1
-    with st.container():
-        st.subheader('Hi, I am a student in SEU.')
-        st.write("[Learn More About Me...](https://seuteer.icu/)")
+    # 设置页面标题
+    st.title('Welcome To Parking Prediction System')
 
-    # Part 2
+    # Part 1
     with st.container():
         st.write("---")
         # 分两列
         col_left, col_right = st.columns(2)
         with col_left:
             st.subheader("About Me")
-            st.markdown("[Github](https://github.com/seuteer)")
+            st.info("""
+            Hi, I am a student in SEU.  
+            [This is my Github](https://github.com/seuteer)  
+            [Learn More About Me...](https://seuteer.icu/)  
+            """)
         with col_right:
             st_lottie(lottie_logo, height=300, key='logo')
 
-    # Part 3
+    # Part 2
     with st.container():
         st.write('---')
         # 鬼刀
@@ -59,21 +60,21 @@ def app():
         with col_img:
             st.image(img_bg_gd)
         with col_text:
-            st.subheader('鬼刀')
+            st.info('鬼刀')
         # 千与千寻
         col_img, col_text = st.columns((1,2))
         with col_img:
             st.image(img_bg_qyqx)
         with col_text:
-            st.subheader('千与千寻')
+            st.info('千与千寻')
         # 薇尔莉特
         col_img, col_text = st.columns((1,2))
         with col_img:
             st.image(img_bg_welt)
         with col_text:
-            st.subheader('薇尔莉特')
+            st.info('薇尔莉特')
 
-    # Part 4
+    # Part 3
     with st.container():
         st.write('---')
         st.subheader('Contact Me')
