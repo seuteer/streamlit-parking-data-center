@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 # 定义管理多页面的类，根据选择显示不同的页面
 class MultiPage:
 	def __init__(self):
