@@ -15,7 +15,6 @@ def app():
 
     # 设置页面标题
     st.title('Welcome To Parking Prediction System')
-    st.write(st.session_state.date_time.date(), st.session_state.date_time.time())  # 使用全局变量date_time
     
     # Part 1
     with st.container():
