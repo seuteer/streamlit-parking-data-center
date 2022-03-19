@@ -36,6 +36,7 @@ git push -u origin main  # 将本地文件上传到github
 ```shell
 git add .
 git commit -m 'v2'
-git push -u origin main
+git pull origin main  # github仓库同步到本地
+git push -u origin main  # 本地上传到github
 ```
 
