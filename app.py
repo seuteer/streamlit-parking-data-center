@@ -1,6 +1,7 @@
 # 页面布局
 
 # 导入第三方库
+import os
 import datetime
 import streamlit as st
 from streamlit.server.server import Server
@@ -9,9 +10,10 @@ from streamlit.script_run_context import get_script_run_ctx as get_report_ctx
 from multiapp import MultiPage
 # 从文件夹中导入.py文件
 from pages import (
-	home, 
+	home,
+	data_collection,
 	data_processing, 
-	data_analysis, 
+	data_analysis,
 	model_building
 )
 
@@ -22,14 +24,12 @@ st.set_page_config(
 	layout='wide',  # 页面布局
 	initial_sidebar_state='auto')  # 侧边栏
 
-# 初始化全局配置，在这里可以定义任意多个全局变量，方便不同程序文件内进行调用
-# first_visit记录了是否第一次访问，若不是第一次访问，则为False
+# 初始化全局配置，方便不同程序文件内进行调用
 if 'first_visit' not in st.session_state:
 	st.session_state.first_visit=True
+	st.snow()  # 第一次访问放气球
 else:
 	st.session_state.first_visit=False
-if st.session_state.first_visit:
-	st.snow()  # 第一次访问放气球
 
 # 设置全局变量：显示当前时间
 # datetime.timedelta(hours=8) : Streamlit Cloud的时区是UTC，加8小时即北京时间
@@ -48,6 +48,7 @@ app = MultiPage()
 
 # 添加页面
 app.add_page('Home', home.app)
+app.add_page("Data Collection", data_collection.app)
 app.add_page('Data Processing', data_processing.app)
 app.add_page('Data Analysis', data_analysis.app)
 app.add_page('Model Building', model_building.app)
