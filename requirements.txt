@@ -1,3 +1,10 @@
+geemap
 streamlit
 streamlit_lottie
+streamlit_folium
 requests
+osmnx
+geopandas
+folium
+shapely
+pyproj
