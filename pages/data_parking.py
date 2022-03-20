@@ -1,33 +1,41 @@
-# 数据处理
+# 停车数据处理
 
 import streamlit as st
 import pandas as pd
 
 def app():
-    st.write('# Data Processing')
+    st.title('Parking Data')
+
+    # 定义全局变量，表示提示信息的占位符
+    global info_st
+    info_st = st.empty()
 
     # load data
     parking_data, locations = load_data()
-    st.write('parking_data', parking_data)
-    st.write('locations', locations)
+    with st.expander('parking data and locations'):
+        st.write('parking data', parking_data)
+        st.write('locations', locations)
 
     # remove parking no space
     parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
-    st.write('parking_data_remove', parking_data_remove)
-    st.write('locations_remove', locations_remove)
+    info_st.info('remove parking no space...')
 
     # create OccupancyRate
     parking_data_create = create_or(parking_data_remove)
-    st.write('parking_data_create', parking_data_create)
-    st.write("bhm_processed.csv saved!")
+    info_st.info('create OccupancyRate...')
 
     # create CorrelationMatrix
     timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
-    st.write('locations_create', locations_create)
-    st.write("locations_processed.csv saved!")
-    st.write('timeSeriesFeatures', timeSeriesFeatures)
-    st.write("timeSeriesFeatures.csv saved!")
+    info_st.info('create CorrelationMatrix...')
+    with st.expander('data processing'):
+        st.write('timeSeriesFeatures', timeSeriesFeatures)
+        st.write('locations with CorrelationMatrix', locations_create)
 
+    info_st.success("Done!")
+
+    # Time series data visualization
+
+        
 
 @st.cache
 def load_data():

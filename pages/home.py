@@ -8,13 +8,12 @@ import json  # 加载本地json文件
 
 
 def app():
+    st.title('Welcome To Parking Prediction System')
+
     # 加载缓存资源
     lottie_logo,img_bg_gd,img_bg_qyqx,img_bg_welt = load_all_data()
     # 加载非缓存资源
     load_css('style/style.css')
-
-    # 设置页面标题
-    st.title('Welcome To Parking Prediction System')
     
     # Part 1
     with st.container():
@@ -22,7 +21,7 @@ def app():
         # 分两列
         col_left, col_right = st.columns(2)
         with col_left:
-            st.subheader("About Me")
+            st.header("About Me")
             st.info("""
             Hi, I am a student in SEU.  
             [This is my Github](https://github.com/seuteer)  
@@ -36,7 +35,7 @@ def app():
     with st.container():
         st.write('---')
         # 鬼刀
-        st.subheader('Background')
+        st.header('Background')
         col_img, col_text = st.columns((1,2))  # 自定义占比(1,2)
         with col_img:
             st.image(img_bg_gd)
@@ -58,7 +57,7 @@ def app():
     # Part 3
     with st.container():
         st.write('---')
-        st.subheader('Contact Me')
+        st.header('Contact Me')
         # Documention: https://formsubmit.co/
         contact_form = """
         <form action="https://formsubmit.co/1240124885@qq.com" method="POST">
@@ -73,10 +72,14 @@ def app():
         with col_left:
             st.markdown(contact_form, unsafe_allow_html=True)
         with col_right:
-            st.empty()  # 取空
+            st.info("""
+            您可以填写左边的表单给我发邮箱信息！  
+            期待与您的联系！
+            """)
 
 
 # 通过url下载lottie中的元素
+st.cache
 def load_lottie(url):
     r = requests.get(url)
     if r.status_code != 200:
@@ -84,15 +87,15 @@ def load_lottie(url):
     return r.json()
 
 # 设置页面显示风格（不能缓存，因为使用了st库：st.markdown）
+st.cache
 def load_css(css_file):
     with open(css_file) as f:
         # unsafe_allow_html=True 表示允许html
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# 利用缓存机制加载资源
-# 最好不要在缓存的函数内使用st库，因为该函数在后续rerun中不会被调用了
+# 利用缓存机制加载资源，最好不要在缓存的函数内使用st库，因为该函数在后续rerun中不会被调用了
 # 除非你就是想要仅在第一次调用时实现某些功能，这时你可以把st.写入缓存函数中，并修改缓存以消除警告 @st.cache(suppress_st_warning=True)
-@st.cache()
+@st.cache
 def load_all_data():
     # lottie_url = 'https://assets5.lottiefiles.com/private_files/lf30_rg5wrsf4.json'
     # lottie_logo = load_lottie(lottie_url)   # 从 url 获取 json 文件，受限于网速

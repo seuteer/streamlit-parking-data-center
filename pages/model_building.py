@@ -3,4 +3,4 @@
 import streamlit as st
 
 def app():
-    st.write('# Model Building')
+    st.title('Model Building')
