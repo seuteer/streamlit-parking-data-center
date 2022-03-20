@@ -1,10 +1,6 @@
-geemap
+geopandas
+osmnx
 streamlit
 streamlit_lottie
-streamlit_folium
-requests
-osmnx
-geopandas
-folium
-shapely
-pyproj
+git+https://github.com/giswqs/leafmap
+git+https://github.com/giswqs/geemap
