@@ -118,7 +118,7 @@ def vis_folium():
 def vis_geemap():
     import geemap
     # 设置环境变量
-    # os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
+    os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
 
     m = geemap.Map(center=[52.479415075, -1.9001145545], zoom=14)
     # 设置 多选框 选择可视化数据
