@@ -4,19 +4,17 @@ import streamlit as st
 import geopandas as gpd
 import pandas as pd
 
-import warnings
-warnings.filterwarnings("ignore")
-
+# 设置环境变量
+os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
 
 def app():
     st.write('# Data Collection')
 
     # 定义全局变量，表示下载信息的占位符
-    global width, height, download_st, row1_col1, row1_col2
-    width = 950
-    height = 600
+    global width, height, download_st
+    width = 900
+    height = 500
     download_st = st.empty()
-    row1_col1, row1_col2 = st.columns([2, 1])
 
     # 从停车场点要素获取研究框
     east, south, west, north = get_bbox_from_points(path=os.path.join(st.session_state.data_input, 'bmh_location.csv'), is_bigbox=True)
@@ -26,14 +24,29 @@ def app():
     download_st.empty()
 
     # 地图可视化
+    row1_col1, row1_col2 = st.columns([3, 1])
     with row1_col2:
+        # 设置 多选框 选择地图
         backend = st.selectbox(
             "Select a plotting backend", ["folium", "geemap"], index=0
         )
-    if backend == "folium":
-        vis_folium()
-    elif backend == "geemap":
-        vis_geemap()
+        if backend == "folium":
+            import geemap.foliumap as geemap
+        elif backend == "geemap":
+            import geemap
+        # 设置 多选框 选择可视化数据
+        options = st.multiselect(
+            'Choose to visualize geographic data',
+            # 筛选 data_temp 中所有的 .geojson 文件，生成列表
+            [geoj for geoj in os.listdir(st.session_state.data_temp) if ('.geojson' in geoj)],
+            # 默认首选的元素
+            ['parking.geojson']
+        )
+    with row1_col1:
+        m = geemap.Map(center=[(north+south)/2, (east+west)/2], zoom=13)
+        for geoj in options:
+            m.add_geojson(os.path.join(st.session_state.data_temp, geoj), layer_name=geoj)
+        m.to_streamlit(width=width, height=height)
 
 
 @st.cache
@@ -84,7 +97,6 @@ def get_data_from_bbox(east, south, west, north, is_download=True):
         gdf_to_geojson(gdf=pois, path=os.path.join(st.session_state.data_temp, 'pois.geojson'))
         gdf_to_geojson(gdf=building_footprints, path=os.path.join(st.session_state.data_temp, 'building_footprints.geojson'))
 
-
 @st.cache(suppress_st_warning=True)
 def gdf_to_geojson(gdf, path):
     if os.path.exists(path):
@@ -92,44 +104,3 @@ def gdf_to_geojson(gdf, path):
     else:
         gdf.to_file(filename=path, driver='GeoJSON', encodeing='utf-8')
         download_st.write(f"{os.path.basename(path)} saved!")
-
-def vis_folium():
-    # visualize with folium
-    import folium
-    from streamlit_folium import folium_static
-
-    m = folium.Map(location=[52.479415075, -1.9001145545], zoom_start=14)
-    # 设置 多选框 选择可视化数据
-    with row1_col2:
-        options = st.multiselect(
-            'Choose to visualize geographic data',
-            # 筛选 data_temp 中所有的 .geojson 文件，生成列表
-            [geoj for geoj in os.listdir(st.session_state.data_temp) if ('.geojson' in geoj)],
-            # 默认首选的元素
-            ['parking.geojson']
-            )
-    for geoj in options:
-        folium.GeoJson(gpd.read_file(os.path.join(st.session_state.data_temp, geoj)), name=geoj).add_to(m)
-    with row1_col1:
-        m.add_child(folium.LayerControl())
-        folium_static(m, width=width, height=height)
-
-def vis_geemap():
-    import geemap
-    # 设置环境变量
-    os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
-
-    m = geemap.Map(center=[52.479415075, -1.9001145545], zoom=14)
-    # 设置 多选框 选择可视化数据
-    with row1_col2:
-        options = st.multiselect(
-            'Choose to visualize geographic data',
-            # 筛选 data_temp 中所有的 .geojson 文件，生成列表
-            [geoj for geoj in os.listdir(st.session_state.data_temp) if ('.geojson' in geoj)],
-            # 默认首选的元素
-            ['parking.geojson']
-            )
-    for geoj in options:
-        m.add_geojson(os.path.join(st.session_state.data_temp, geoj), layer_name=geoj)
-    with row1_col1:
-        m.to_streamlit(width=width, height=height)
