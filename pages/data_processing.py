@@ -3,47 +3,38 @@
 import streamlit as st
 import pandas as pd
 
-# 定义全局变量（注意：当前路径是 app.py 所在文件夹的路径）
-data_input = './data/input/'
-data_output = './data/output/'
-data_temp = './data/temp/'
-
-
 def app():
     st.write('# Data Processing')
 
-    if st.button('Run'):
+    # load data
+    parking_data, locations = load_data()
+    st.write('parking_data', parking_data)
+    st.write('locations', locations)
 
-        st.write('## load data')
-        parking_data, locations = load_data()
-        st.write('parking_data', parking_data)
-        st.write('locations', locations)
+    # remove parking no space
+    parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
+    st.write('parking_data_remove', parking_data_remove)
+    st.write('locations_remove', locations_remove)
 
-        st.write('## remove parking no space')
-        parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
-        st.write('parking_data_remove', parking_data_remove)
-        st.write('locations_remove', locations_remove)
+    # create OccupancyRate
+    parking_data_create = create_or(parking_data_remove)
+    st.write('parking_data_create', parking_data_create)
+    st.write("bhm_processed.csv saved!")
 
-        st.write('## create OccupancyRate')
-        parking_data_create = create_or(parking_data_remove)
-        st.write('parking_data_create', parking_data_create)
-        st.write("bhm_processed.csv saved!")
-
-        st.write('## create CorrelationMatrix')
-        timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
-        st.write('locations_create', locations_create)
-        st.write("locations_processed.csv saved!")
-        st.write('timeSeriesFeatures', timeSeriesFeatures)
-        st.write("timeSeriesFeatures.csv saved!")
-
+    # create CorrelationMatrix
+    timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
+    st.write('locations_create', locations_create)
+    st.write("locations_processed.csv saved!")
+    st.write('timeSeriesFeatures', timeSeriesFeatures)
+    st.write("timeSeriesFeatures.csv saved!")
 
 
 @st.cache
 def load_data():
     '''加载数据'''
     # 导入原始数据（停车占有率表+位置经纬度表）
-    parking_data = pd.read_csv(data_input + 'birmingham.csv')
-    locations = pd.read_csv(data_input + 'bmh_location.csv')
+    parking_data = pd.read_csv(st.session_state.data_input + 'birmingham.csv')
+    locations = pd.read_csv(st.session_state.data_input + 'bmh_location.csv')
     return parking_data, locations
 
 @st.cache
@@ -71,7 +62,7 @@ def create_or(parking_data):
     data.reset_index(drop=True, inplace=True)
     data['LastUpdated'] = pd.to_datetime(data['LastUpdated'], format="%Y/%m/%d %H:%M")
     data.sort_values(by=['SystemCodeNumber', 'LastUpdated'], inplace=True)
-    data.to_csv(data_output + 'bhm_processed.csv', index=False)
+    data.to_csv(st.session_state.data_output + 'bhm_processed.csv', index=False)
     return data
 
 @st.cache
@@ -93,7 +84,7 @@ def create_rs(parking_data, locations):
     # 将相关性矩阵连接到静态表，用于构建空间特征权重
     locations_processed = locations.merge(rs, on='SystemCodeNumber')
     # 保存空间表，用于构建多变量特征
-    data_space.to_csv(data_output + 'timeSeriesFeatures.csv')
+    data_space.to_csv(st.session_state.data_output + 'timeSeriesFeatures.csv')
     # 保存静态数据
-    locations_processed.to_csv(data_output + 'locations_processed.csv', index=False)
+    locations_processed.to_csv(st.session_state.data_output + 'locations_processed.csv', index=False)
     return data_space, locations_processed
