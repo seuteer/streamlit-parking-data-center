@@ -31,10 +31,10 @@ def app():
         )
         if backend == "folium":
             import geemap.foliumap as geemap
-            info_st.info("您选择了 folium 作为底图（推荐）")
+            info_st.success("您选择了 folium 作为底图（推荐）")
         elif backend == "geemap":
             import geemap
-            info_st.info("您选择了 geemap 作为底图")
+            info_st.success("您选择了 geemap 作为底图")
         # 设置 多选框 选择可视化数据
         options = st.multiselect(
             'Choose to visualize geographic data',
