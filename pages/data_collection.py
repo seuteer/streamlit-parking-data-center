@@ -1,6 +1,5 @@
 # 数据获取
 import os
-from turtle import width
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
