@@ -38,6 +38,11 @@ def app():
     with row1_col1:
         lon, lat = leafmap.gdf_centroid(dict_layer_gdf['parking'])
         m = leafmap.Map(center=[lat, lon], zoom=13)
+        m.add_tile_layer(
+            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+            name="Google Satellite",
+            attribution="Google",
+        )
         for layer in layer_list:
             m.add_gdf(dict_layer_gdf[layer], layer_name=layer)
         m.to_streamlit(width=900, height=500)
