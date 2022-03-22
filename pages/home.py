@@ -73,7 +73,7 @@ def app():
             st.markdown(contact_form, unsafe_allow_html=True)
         with col_right:
             st.info("""
-            您可以填写左边的表单给我发邮箱信息！  
+            您可以通过填写表单给我发邮箱信息！  
             期待与您的联系！
             """)
 

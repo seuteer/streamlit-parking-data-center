@@ -4,104 +4,102 @@ import os
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
+import leafmap.foliumap as leafmap
 
-# 设置环境变量
-os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
+# # 设置geemap环境变量
+# os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
 
 def app():
     st.title('Geographic Data')
 
     # 定义全局变量，表示提示信息的占位符
-    global width, height, info_st
-    width = 900
-    height = 500
+    global info_st
     info_st = st.empty()
+    gpkg_path = os.path.join(st.session_state.data_temp, 'birmingham.gpkg')
 
-    # 从停车场点要素获取研究框
-    east, south, west, north = get_bbox_from_points(path=os.path.join(st.session_state.data_input, 'bmh_location.csv'), is_bigbox=True)
-    # 根据研究框获取地理数据
-    get_data_from_bbox(east=east, south=south, west=west, north=north, is_download=True)
+    # 获取存储地理数据的字典
+    dict_layer_gdf = dowmload_osm_data(gpkg_path=gpkg_path)
 
-    # 地图可视化
+    # 保存gdf数据到gpkg图层库
+    gdfs_to_gpkg(dict_layer_gdf=dict_layer_gdf, gpkg_path=gpkg_path)
+
+    # 地理数据可视化
     row1_col1, row1_col2 = st.columns([3, 1])
     with row1_col2:
-        # 设置 多选框 选择地图
-        backend = st.selectbox(
-            "Select a plotting backend", ["folium", "geemap"], index=0
-        )
-        if backend == "folium":
-            import geemap.foliumap as geemap
-            info_st.success("您选择了 folium 作为底图（推荐）")
-        elif backend == "geemap":
-            import geemap
-            info_st.success("您选择了 geemap 作为底图")
         # 设置 多选框 选择可视化数据
-        options = st.multiselect(
+        layer_list = st.multiselect(
             'Choose to visualize geographic data',
-            # 筛选 data_temp 中所有的 .geojson 文件，生成列表
-            [geoj for geoj in os.listdir(st.session_state.data_temp) if ('.geojson' in geoj)],
+            # 列出所有图层
+            list(dict_layer_gdf.keys()),
             # 默认首选的元素
-            ['parking.geojson']
+            ['parking']
         )
+        info_st.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
-        m = geemap.Map(center=[(north+south)/2, (east+west)/2], zoom=13)
-        for geoj in options:
-            m.add_geojson(os.path.join(st.session_state.data_temp, geoj), layer_name=geoj)
-        m.to_streamlit(width=width, height=height)
+        lon, lat = leafmap.gdf_centroid(dict_layer_gdf['parking'])
+        m = leafmap.Map(center=[lat, lon], zoom=13)
+        for layer in layer_list:
+            m.add_gdf(dict_layer_gdf[layer], layer_name=layer)
+        m.to_streamlit(width=900, height=500)
 
-
-@st.cache
-def get_bbox_from_points(path, is_bigbox=False):
-    import pyproj
-    import shapely
-    # 导入停车场坐标
-    df = gpd.read_file(path)
-    df[['longtitude', 'latitude']] = df[['longtitude', 'latitude']].apply(pd.to_numeric)
-    # 创建 parking
-    parking = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.longtitude, df.latitude), crs=pyproj.CRS("WGS84"))
-    # 保存 parking 点要素
-    gdf_to_geojson(gdf=parking, path=os.path.join(st.session_state.data_temp, 'parking.geojson'))
-    # 创建 MultiPoint 对象，以获取研究区域
-    box = shapely.geometry.MultiPoint(df[['longtitude', 'latitude']].values).bounds
-    east, south, west, north = box
-    # 扩大研究区域，默认不扩大
-    if is_bigbox:
-        w_e = west - east
-        n_s = north - south
-        east, south, west, north = east-w_e, south-n_s, west+w_e, north+n_s
-    return east, south, west, north
 
 @st.cache(suppress_st_warning=True)
-def get_data_from_bbox(east, south, west, north, is_download=True):
+def dowmload_osm_data(gpkg_path):
     import osmnx as ox
-    # 城市道路 line
-    road_drive = ox.graph_from_bbox(north, south, east, west, network_type="drive")
-    # 将网络转换为节点和边
-    gdf_nodes, gdf_edges = ox.graph_to_gdfs(road_drive)
-    gdf_edges = gdf_edges.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
-    gdf_nodes = gdf_nodes.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
-    info_st.info('road_drive download!')
-    # POI point
-    pois = ox.geometries_from_bbox(north, south, east, west, tags={"amenity": True})
-    pois = pois.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
-    pois = pois[pois['geometry'].type.isin(['Point'])]
-    info_st.info('pois download!')
-    # 建筑足迹 polygon
-    building_footprints = ox.geometries_from_bbox(north, south, east, west, tags={"building": True})
-    building_footprints = building_footprints.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
-    building_footprints = building_footprints[building_footprints['geometry'].type.isin(['Polygon'])]
-    info_st.info('building footprints download!')
-    # 保存数据
-    if is_download:
-        gdf_to_geojson(gdf=gdf_edges, path=os.path.join(st.session_state.data_temp, 'edges.geojson'))
-        gdf_to_geojson(gdf=gdf_nodes, path=os.path.join(st.session_state.data_temp, 'nodes.geojson'))
-        gdf_to_geojson(gdf=pois, path=os.path.join(st.session_state.data_temp, 'pois.geojson'))
-        gdf_to_geojson(gdf=building_footprints, path=os.path.join(st.session_state.data_temp, 'building_footprints.geojson'))
+    import pyproj
+
+    # 定义字典存储地理数据
+    dict_layer_gdf = {
+        'parking': None,
+        'nodes': None,
+        'edges': None,
+        'pois': None,
+        'buildings': None
+    }
+
+    # 首先读取数据，若失败则下载数据
+    if os.path.exists(gpkg_path):
+        info_st.info("正在加载云端数据...")
+        for layer in dict_layer_gdf.keys():
+            dict_layer_gdf[layer] = gpd.read_file(gpkg_path, layer=layer)
+        info_st.success("云端数据加载完毕!")
+    else:
+        # 停车场点要素
+        info_st.info("parking download...")
+        df = gpd.read_file(os.path.join(st.session_state.data_input, 'bmh_location.csv'))
+        df[['longtitude', 'latitude']] = df[['longtitude', 'latitude']].apply(pd.to_numeric)
+        dict_layer_gdf['parking'] = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.longtitude, df.latitude), crs=pyproj.CRS("WGS84"))
+        # 获取并扩大研究范围
+        west, south, east, north = leafmap.gdf_bounds(dict_layer_gdf['parking'])
+        dew, dns = (east-west)/2, (north-south)/2
+        west, south, east, north = west-dew, south-dns, east+dew, north+dns
+        # 道路网节点和线
+        info_st.info("roads download...")
+        graph = ox.graph_from_bbox(north, south, east, west, network_type="drive", clean_periphery=True)
+        dict_layer_gdf['nodes'], dict_layer_gdf['edges'] = ox.graph_to_gdfs(graph)
+        # POI
+        info_st.info("pois download...")
+        pois = ox.geometries_from_bbox(north, south, east, west, tags={"amenity": True})
+        dict_layer_gdf['pois'] = pois[pois['geometry'].type.isin(['Point'])]  # 筛选点要素
+        # 建筑实体
+        info_st.info("buildings download...")
+        buildings = ox.geometries_from_bbox(north, south, east, west, tags={"building": True})
+        dict_layer_gdf['buildings'] = buildings[buildings['geometry'].type.isin(['Polygon'])]  # 保留 Polygon 面要素
+    
+    return dict_layer_gdf
+
 
 @st.cache(suppress_st_warning=True)
-def gdf_to_geojson(gdf, path):
-    if os.path.exists(path):
-        info_st.info(f"{os.path.basename(path)} already exists!")
+def gdfs_to_gpkg(dict_layer_gdf, gpkg_path):
+    if os.path.exists(gpkg_path):
+        info_st.info(gpkg_path + " exists!")
     else:
-        gdf.to_file(filename=path, driver='GeoJSON', encodeing='utf-8')
-        info_st.info(f"{os.path.basename(path)} saved!")
+        # 批量保存 gdf 数据
+        for layer, gdf in dict_layer_gdf.items():
+            info_st.info(layer + " saving...")
+            # 为了成功保存，转换数据类型为字符串
+            gdf = gdf.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
+            gdf.to_file(
+                filename=gpkg_path,
+                driver='GPKG', 
+                layer=layer)
