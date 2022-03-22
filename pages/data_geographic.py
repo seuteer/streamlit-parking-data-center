@@ -26,23 +26,23 @@ def app():
     # 地理数据可视化
     row1_col1, row1_col2 = st.columns([3, 1])
     with row1_col2:
+        # 设置 选择框 选择底图
+        basemap = st.radio(
+            "请选择地图",
+            ('OpenStreetMap', 'ROADMAP', 'HYBRID'))
         # 设置 多选框 选择可视化数据
         layer_list = st.multiselect(
-            'Choose to visualize geographic data',
+            '请选择图层',
             # 列出所有图层
             list(dict_layer_gdf.keys()),
             # 默认首选的元素
-            ['parking']
+            []
         )
         info_st.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
         lon, lat = leafmap.gdf_centroid(dict_layer_gdf['parking'])
         m = leafmap.Map(center=[lat, lon], zoom=13)
-        m.add_tile_layer(
-            url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-            name="Google Satellite",
-            attribution="Google",
-        )
+        m.add_basemap(basemap=basemap)
         for layer in layer_list:
             m.add_gdf(dict_layer_gdf[layer], layer_name=layer)
         m.to_streamlit(width=900, height=500)
@@ -107,4 +107,5 @@ def gdfs_to_gpkg(dict_layer_gdf, gpkg_path):
             gdf.to_file(
                 filename=gpkg_path,
                 driver='GPKG', 
-                layer=layer)
+                layer=layer
+                )
