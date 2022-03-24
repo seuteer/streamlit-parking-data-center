@@ -3,6 +3,7 @@
 import os
 import streamlit as st
 import geopandas as gpd
+import osmnx as ox
 import pandas as pd
 import folium
 import leafmap.foliumap as leafmap
@@ -18,11 +19,8 @@ def app():
     info_st = st.empty()
     gpkg_path = os.path.join(st.session_state.data_temp, 'birmingham.gpkg')
 
-    # 获取存储地理数据的字典
+    # 获取存储地理数据的字典，并保存数据到本地
     dict_layer_gdf = dowmload_osm_data(gpkg_path=gpkg_path)
-
-    # 保存gdf数据到gpkg图层库
-    gdfs_to_gpkg(dict_layer_gdf=dict_layer_gdf, gpkg_path=gpkg_path)
 
     # 地理数据可视化
     row1_col1, row1_col2 = st.columns([3, 1])
@@ -78,7 +76,6 @@ def app():
 
 @st.cache(suppress_st_warning=True)
 def dowmload_osm_data(gpkg_path):
-    import osmnx as ox
     import pyproj
 
     # 定义字典存储地理数据
@@ -109,7 +106,10 @@ def dowmload_osm_data(gpkg_path):
         # 道路网节点和线
         info_st.info("roads download...")
         graph = ox.graph_from_bbox(north, south, east, west, network_type="drive", clean_periphery=True)
-        dict_layer_gdf['nodes'], dict_layer_gdf['edges'] = ox.graph_to_gdfs(graph)
+        # 网络分析
+        info_st.info("network analysis...")
+        graph_analysis = network_analysis(graph=graph)
+        dict_layer_gdf['nodes'], dict_layer_gdf['edges'] = ox.graph_to_gdfs(graph_analysis)
         # POI
         info_st.info("pois download...")
         pois = ox.geometries_from_bbox(north, south, east, west, tags={"amenity": True})
@@ -118,22 +118,33 @@ def dowmload_osm_data(gpkg_path):
         info_st.info("buildings download...")
         buildings = ox.geometries_from_bbox(north, south, east, west, tags={"building": True})
         dict_layer_gdf['buildings'] = buildings[buildings['geometry'].type.isin(['Polygon'])]  # 保留 Polygon 面要素
+        # 保存下载后的数据到gpkg
+        gdfs_to_gpkg(dict_layer_gdf=dict_layer_gdf, gpkg_path=gpkg_path)
     
     return dict_layer_gdf
 
-
-@st.cache(suppress_st_warning=True)
+# 内部函数
 def gdfs_to_gpkg(dict_layer_gdf, gpkg_path):
-    if os.path.exists(gpkg_path):
-        info_st.info(gpkg_path + " exists!")
-    else:
-        # 批量保存 gdf 数据
-        for layer, gdf in dict_layer_gdf.items():
-            info_st.info(layer + " saving...")
-            # 为了成功保存，转换数据类型为字符串
-            gdf = gdf.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
-            gdf.to_file(
-                filename=gpkg_path,
-                driver='GPKG', 
-                layer=layer
-                )
+    # 批量保存 gdf 数据
+    for layer, gdf in dict_layer_gdf.items():
+        info_st.info(layer + " saving...")
+        # 为了成功保存，转换数据类型为字符串
+        gdf = gdf.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
+        gdf.to_file(filename=gpkg_path, driver='GPKG', layer=layer)
+
+# 内部函数
+def network_analysis(graph):
+    import networkx as nx
+    graph_analysis = graph
+    info_st.info("正在计算道路中心度...")
+    edge_centrality = nx.closeness_centrality(nx.line_graph(graph_analysis))
+    nx.set_edge_attributes(graph_analysis, edge_centrality, "edge_centrality")
+    info_st.info("正在计算道路速度和行驶时间...")
+    graph_analysis = ox.speed.add_edge_speeds(graph_analysis)
+    graph_analysis = ox.speed.add_edge_travel_times(graph_analysis)
+    # 计算节点高程 elevation 及道路坡度 grade 需要准备网络区域的DEM高程数据
+    info_st.info("正在计算节点高程及道路坡度...")
+    ox.elevation.add_node_elevations_raster(G=graph_analysis, filepath=os.path.join(st.session_state.data_input, 'DEM-birmingham.tif'), cpus=1)
+    ox.elevation.add_edge_grades(G=graph_analysis, add_absolute=True)
+    # 返回处理后的网络节点和边
+    return graph_analysis

@@ -28,9 +28,9 @@ st.session_state.data_input = './data/input/'
 st.session_state.data_output = './data/output/'
 st.session_state.data_temp = './data/temp/'
 st.session_state.date_time=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(hours=8)  # 北京时间
-session_id = get_report_ctx().session_id
+# session_id = get_report_ctx().session_id
 sessions = Server.get_current()._session_info_by_id
-session_ws = sessions[session_id].ws
+# session_ws = sessions[session_id].ws
 st.session_state.current_persons = len(sessions)  # 在线人数
 
 

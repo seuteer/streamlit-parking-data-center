@@ -1,4 +1,5 @@
 geopandas
+networkx
 osmnx
 streamlit
 streamlit_lottie
