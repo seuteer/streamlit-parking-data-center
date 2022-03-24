@@ -4,5 +4,6 @@ osmnx
 streamlit
 streamlit_lottie
 folium
+branca
 git+https://github.com/giswqs/leafmap
 git+https://github.com/giswqs/geemap

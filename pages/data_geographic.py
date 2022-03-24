@@ -6,6 +6,7 @@ import geopandas as gpd
 import osmnx as ox
 import pandas as pd
 import folium
+import branca  # 配合 folium 进行配色
 import leafmap.foliumap as leafmap
 
 # # 设置geemap环境变量
@@ -53,14 +54,21 @@ def app():
                     zoom_to_layer=False
                 )
             elif layer == 'nodes':
+                nodes = dict_layer_gdf['nodes']
+                nodes['street_count'] = nodes['street_count'].astype(dtype="int8")  # 此处会改变输出结果的值，我们是允许的
+                colormap = branca.colormap.LinearColormap(
+                    vmin=nodes['street_count'].min(),  
+                    vmax=nodes['street_count'].max(),
+                    colors=['green','red'],
+                    caption="Street Count")
                 m.add_gdf(  # 继承 folium.GeoJSON 类的参数
                     dict_layer_gdf['nodes'],
                     popup=folium.GeoJsonPopup(fields=['street_count'], aliases=['街道连接数']),  # GeoJsonPopup
-                    tooltip=folium.GeoJsonTooltip(fields=['street_count'], aliases=['街道连接数']),  # GeoJsonTooltip
                     marker=folium.CircleMarker(radius=2),  # Circle, CircleMarker or Marker
-                    style={"color": "gray","weight": 1},
+                    style_callback=lambda x: {"color": colormap(x["properties"]["street_count"]),},
+                    hover_style={"color": 'gray'},
                     layer_name='nodes',
-                    zoom_to_layer=False
+                    zoom_to_layer=False,
                 )
             elif layer == 'pois':
                 df_pois = leafmap.gdf_to_df(dict_layer_gdf['pois']).copy()
@@ -69,12 +77,40 @@ def app():
                 df_pois['value'] = 1  # 创建热力图的值字段
                 # m.add_points_from_xy(df_pois, popup=['name'], layer_name='pois')  # 此版本无法在streamlit中使用Marker Cluster
                 m.add_heatmap(df_pois, value="value", radius=15, name='pois')
-            else:
-                m.add_gdf(dict_layer_gdf[layer], layer_name=layer, zoom_to_layer=False)
+            elif layer == 'edges':
+                edges = dict_layer_gdf['edges']
+                edges['edge_centrality'] = round(edges['edge_centrality'].astype(dtype="float64"), 5)  # 此处会改变输出结果的值，我们是允许的
+                edges['length'] = round(edges['length'].astype(dtype="float64"), 1)
+                colormap = branca.colormap.LinearColormap(
+                    vmin=edges['edge_centrality'].quantile(0.0),  # 0分位数
+                    vmax=edges['edge_centrality'].quantile(1),  # 1分位数
+                    colors=['darkgreen', 'green', 'red'],  # 调色板
+                    caption="Edge Centrality")  # 标题
+                m.add_gdf(
+                    dict_layer_gdf['edges'],
+                    layer_name='edges',
+                    style_callback=lambda x: {"color": colormap(x["properties"]["edge_centrality"]),},
+                    tooltip=folium.GeoJsonTooltip(
+                        fields=['name','edge_centrality','length','speed_kph','travel_time','grade'], 
+                        aliases=['道路名称','道路中心度','道路长度(m)','行驶速度(km/h)','行驶时间(s)','平均坡度(%)']),
+                    hover_style={"color": 'black'},
+                    zoom_to_layer=False
+                )
+            elif layer == 'buildings':
+                dict_layer_gdf['buildings'] = dict_layer_gdf['buildings'].to_crs(3857)  # 3857是投影坐标系，4326是经纬度坐标
+                dict_layer_gdf['buildings']['area'] = round(dict_layer_gdf['buildings'].area, 2)   # 此处会改变输出结果的值，我们是允许的
+                m.add_gdf(
+                    dict_layer_gdf['buildings'], 
+                    layer_name='buildings',
+                    tooltip=folium.GeoJsonTooltip(
+                        fields=['name','area','amenity'], 
+                        aliases=['建筑名称','总建筑面积(平方米)','建筑设施']),
+                    zoom_to_layer=False
+                )
         m.to_streamlit(width=900, height=500)
 
 
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def dowmload_osm_data(gpkg_path):
     import pyproj
 
