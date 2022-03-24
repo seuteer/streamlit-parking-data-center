@@ -30,7 +30,8 @@ def app():
         # 设置 选择框 选择底图
         basemap = st.radio(
             "请选择地图",
-            ('OpenStreetMap', 'ROADMAP', 'HYBRID'))
+            ('OpenStreetMap', 'ROADMAP', 'HYBRID'),
+            index=1)
         # 设置 多选框 选择可视化数据
         layer_list = st.multiselect(
             '请选择图层',
