@@ -2,5 +2,6 @@ geopandas
 osmnx
 streamlit
 streamlit_lottie
+folium
 git+https://github.com/giswqs/leafmap
 git+https://github.com/giswqs/geemap

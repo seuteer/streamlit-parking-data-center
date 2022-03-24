@@ -4,6 +4,7 @@ import os
 import streamlit as st
 import geopandas as gpd
 import pandas as pd
+import folium
 import leafmap.foliumap as leafmap
 
 # # 设置geemap环境变量
@@ -36,15 +37,41 @@ def app():
             # 列出所有图层
             list(dict_layer_gdf.keys()),
             # 默认首选的元素
-            []
+            ['parking']
         )
         info_st.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
-        lon, lat = leafmap.gdf_centroid(dict_layer_gdf['parking'])
-        m = leafmap.Map(center=[lat, lon], zoom=13)
+        m = leafmap.Map()
         m.add_basemap(basemap=basemap)
+        m.zoom_to_gdf(dict_layer_gdf['nodes'])
         for layer in layer_list:
-            m.add_gdf(dict_layer_gdf[layer], layer_name=layer)
+            if layer == 'parking':
+                m.add_gdf(  # 继承 folium.GeoJSON 类的参数
+                    dict_layer_gdf['parking'],
+                    tooltip=folium.GeoJsonTooltip(fields=['SystemCodeNumber'], aliases=['停车场编号']),
+                    marker=folium.Marker(icon=folium.Icon(color='green', icon='car', prefix='fa')),
+                    layer_name='parking',
+                    zoom_to_layer=False
+                )
+            elif layer == 'nodes':
+                m.add_gdf(  # 继承 folium.GeoJSON 类的参数
+                    dict_layer_gdf['nodes'],
+                    popup=folium.GeoJsonPopup(fields=['street_count'], aliases=['街道连接数']),  # GeoJsonPopup
+                    tooltip=folium.GeoJsonTooltip(fields=['street_count'], aliases=['街道连接数']),  # GeoJsonTooltip
+                    marker=folium.CircleMarker(radius=2),  # Circle, CircleMarker or Marker
+                    style={"color": "gray","weight": 1},
+                    layer_name='nodes',
+                    zoom_to_layer=False
+                )
+            elif layer == 'pois':
+                df_pois = leafmap.gdf_to_df(dict_layer_gdf['pois']).copy()
+                df_pois['longitude'] = dict_layer_gdf['pois']['geometry'].x
+                df_pois['latitude'] = dict_layer_gdf['pois']['geometry'].y
+                df_pois['value'] = 1  # 创建热力图的值字段
+                # m.add_points_from_xy(df_pois, popup=['name'], layer_name='pois')  # 此版本无法在streamlit中使用Marker Cluster
+                m.add_heatmap(df_pois, value="value", radius=15, name='pois')
+            else:
+                m.add_gdf(dict_layer_gdf[layer], layer_name=layer, zoom_to_layer=False)
         m.to_streamlit(width=900, height=500)
 
 
