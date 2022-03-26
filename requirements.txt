@@ -3,6 +3,8 @@ networkx
 osmnx
 streamlit
 streamlit_lottie
+streamlit_folium
+altair
 folium
 branca
 git+https://github.com/giswqs/leafmap

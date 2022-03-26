@@ -1,6 +1,8 @@
 # 停车数据处理
 
+import folium
 import streamlit as st
+from streamlit_folium import folium_static
 import pandas as pd
 
 def app():
@@ -34,8 +36,20 @@ def app():
     info_st.success("Done!")
 
     # Time series data visualization
+    st.write('---')
+    st.altair_chart(
+        plot_altair(parking_data_create, locations_create), 
+        use_container_width=True
+        )
 
-        
+    # Geospatial Visualization
+    st.write('---')
+    time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
+    lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
+    m = folium.Map(location=(lat, lon), zoom_start=14)
+    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
+    folium_static(m, width=900, height=600)
+   
 
 @st.cache
 def load_data():
@@ -96,3 +110,103 @@ def create_rs(parking_data, locations):
     # 保存静态数据
     locations_processed.to_csv(st.session_state.data_output + 'locations_processed.csv', index=False)
     return data_space, locations_processed
+
+@st.cache(allow_output_mutation=True)
+def plot_altair(parking_data, locations):
+    import altair as alt
+
+    # 转换长数据
+    long_data = pd.merge(parking_data, locations, on='SystemCodeNumber')
+    long_data['LastUpdated'] = pd.to_datetime(long_data['LastUpdated'], format="%Y/%m/%d %H:%M")
+    long_data['weekday'] = long_data['LastUpdated'].dt.weekday
+    long_data['hour'] = long_data['LastUpdated'].dt.hour
+    long_data['is_weekends'] = (long_data['weekday'] == 5) | (long_data['weekday'] == 6)
+    long_data = long_data.groupby(['SystemCodeNumber', 'weekday', 'hour']).mean()
+    long_data = long_data.reset_index()
+    long_data['datetime'] = pd.to_datetime(
+        (long_data['weekday']+1).astype("str") + ' ' + (long_data['hour']).astype("str"),
+        format='%d %H')
+
+    # 定义选择器
+    selection = alt.selection(fields=['SystemCodeNumber'], type='single', on='mouseover', nearest=True)
+    # 定义颜色配置
+    color_scale = alt.Scale(domain=[True, False], range=['#F5B041', '#5DADE2'])
+    # 定义全局配置
+    base = alt.Chart(long_data).properties(
+        width=350,
+        height=200
+    ).add_selection(selection)
+    # 位置散点图
+    scatter = base.mark_circle().encode(
+        x=alt.X(
+            'mean(longtitude)',
+            scale=alt.Scale(domain=(long_data['longtitude'].min(), long_data['longtitude'].max()))
+        ),
+        y=alt.Y(
+            'mean(latitude)',
+            scale=alt.Scale(domain=(long_data['latitude'].min(), long_data['latitude'].max()))
+        ),
+        color=alt.condition(
+            selection, 
+            "mean(OccupancyRate):Q",
+            alt.value("lightgray"),
+            legend=None
+        ),
+        size=alt.Size('mean(OccupancyRate):Q', legend=None),
+        tooltip=['SystemCodeNumber', 'mean(OccupancyRate):Q'],
+    )
+    # 时间序列图
+    sequential = base.mark_line().encode(
+        x='datetime:T',
+        y='mean(OccupancyRate):Q',
+        color=alt.Color('weekday:N', legend=None),
+    ).transform_filter(
+        selection
+    )
+    # 置信区间图
+    line = base.mark_line().encode(
+        x='hour',
+        y='mean(OccupancyRate):Q',
+        color=alt.Color('is_weekends', legend=None, scale=color_scale)
+    ).transform_filter(
+        selection
+    )
+    band = base.mark_errorband(extent='ci').encode(
+        x='hour',
+        y='OccupancyRate:Q',
+        color=alt.Color('is_weekends', legend=None, scale=color_scale)
+    ).transform_filter(
+        selection
+    )
+    # 气泡表格图
+    table = base.mark_circle().encode(
+        x='hours(datetime):O',
+        y='day(datetime):O',
+        size=alt.Size('mean(OccupancyRate):Q', legend=None),
+        color=alt.Color('is_weekends', legend=None, scale=color_scale),
+        tooltip='mean(OccupancyRate):Q',
+    ).transform_filter(
+        selection
+    )
+    fig = alt.vconcat(
+        (scatter | sequential),
+        ((band + line) | table)
+    )
+    return fig
+
+@st.cache
+def plot_folium(locations, data_space):
+    SystemCodeNumber = locations['SystemCodeNumber'].unique()
+    time_list = []
+    for time_id in range(len(data_space)):
+        parking_list = []
+        for parking_id in SystemCodeNumber:
+            parking_list.append([
+                locations.loc[locations['SystemCodeNumber']==parking_id, 'latitude'].values[0],
+                locations.loc[locations['SystemCodeNumber']==parking_id, 'longtitude'].values[0],
+                data_space[parking_id][time_id]
+            ])
+        time_list.append(parking_list)
+    data_space = data_space.reset_index()
+    time_index = list(data_space['LastUpdated'].astype(dtype="str"))
+    return time_list, time_index
