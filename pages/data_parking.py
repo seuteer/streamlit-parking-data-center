@@ -147,9 +147,9 @@ def plot_altair(parking_data, locations):
             scale=alt.Scale(domain=(long_data['latitude'].min(), long_data['latitude'].max()))
         ),
         color=alt.condition(
-            selection, 
-            "mean(OccupancyRate):Q",
+            selection,
             alt.value("lightgray"),
+            "mean(OccupancyRate):Q",
             legend=None
         ),
         size=alt.Size('mean(OccupancyRate):Q', legend=None),
