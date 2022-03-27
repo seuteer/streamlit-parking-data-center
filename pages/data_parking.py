@@ -4,6 +4,7 @@ import folium
 import streamlit as st
 from streamlit_folium import folium_static
 import pandas as pd
+import datetime
 
 def app():
     st.title('Parking Data')
@@ -30,8 +31,9 @@ def app():
     timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
     info_st.info('create CorrelationMatrix...')
     with st.expander('data processing'):
-        st.write('timeSeriesFeatures', timeSeriesFeatures)
+        st.write('parking data with OccupancyRate', parking_data_create)
         st.write('locations with CorrelationMatrix', locations_create)
+        st.write('timeSeriesFeatures', timeSeriesFeatures)
 
     info_st.success("Done!")
 
@@ -125,7 +127,7 @@ def plot_altair(parking_data, locations):
     long_data = long_data.reset_index()
     long_data['datetime'] = pd.to_datetime(
         (long_data['weekday']+1).astype("str") + ' ' + (long_data['hour']).astype("str"),
-        format='%d %H')
+        format='%d %H') + datetime.timedelta(hours=8)  # 设置显示北京时间
 
     # 定义选择器
     selection = alt.selection(fields=['SystemCodeNumber'], type='single', on='mouseover', nearest=True)
@@ -158,22 +160,22 @@ def plot_altair(parking_data, locations):
     # 时间序列图
     sequential = base.mark_line().encode(
         x='datetime:T',
-        y='mean(OccupancyRate):Q',
+        y=alt.Y('mean(OccupancyRate):Q', scale=alt.Scale(domain=[0,1])),
         color=alt.Color('weekday:N', legend=None),
     ).transform_filter(
         selection
     )
     # 置信区间图
     line = base.mark_line().encode(
-        x='hour',
-        y='mean(OccupancyRate):Q',
+        x='hours(datetime):O',
+        y=alt.Y('mean(OccupancyRate):Q', scale=alt.Scale(domain=[0,1])),
         color=alt.Color('is_weekends', legend=None, scale=color_scale)
     ).transform_filter(
         selection
     )
     band = base.mark_errorband(extent='ci').encode(
-        x='hour',
-        y='OccupancyRate:Q',
+        x='hours(datetime):O',
+        y=alt.Y('OccupancyRate:Q', scale=alt.Scale(domain=[0,1])),
         color=alt.Color('is_weekends', legend=None, scale=color_scale)
     ).transform_filter(
         selection
