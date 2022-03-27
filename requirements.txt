@@ -1,6 +1,6 @@
-# geopandas
-# networkx
-# osmnx
+geopandas
+networkx
+osmnx
 streamlit
 streamlit_lottie
 altair
