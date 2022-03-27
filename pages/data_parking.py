@@ -127,7 +127,8 @@ def plot_altair(parking_data, locations):
     long_data = long_data.reset_index()
     long_data['datetime'] = pd.to_datetime(
         (long_data['weekday']+1).astype("str") + ' ' + (long_data['hour']).astype("str"),
-        format='%d %H') + datetime.timedelta(hours=8)  # 设置显示北京时间
+        format='%d %H'
+        ) - datetime.timedelta(hours=8)  # 设置显示北京时间
 
     # 定义选择器
     selection = alt.selection(fields=['SystemCodeNumber'], type='single', on='mouseover', nearest=True)
