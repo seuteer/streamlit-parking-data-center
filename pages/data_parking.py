@@ -37,7 +37,7 @@ def app():
 
     info_st.success("Done!")
 
-    with st.container():
+    with st.expander("Time series data visualization"):
         # Time series data visualization
         st.write('---')
         st.altair_chart(
@@ -45,14 +45,14 @@ def app():
             use_container_width=True
             )
 
-    with st.container():
+    with st.expander("Geospatial Visualization"):
         # Geospatial Visualization
         st.write('---')
         time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
         lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
         m = folium.Map(location=(lat, lon), zoom_start=14)
         folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
-        folium_static(m, width=900, height=600)
+        folium_static(m)
    
 
 @st.cache
