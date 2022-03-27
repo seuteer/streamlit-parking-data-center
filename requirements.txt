@@ -1,11 +1,11 @@
-geopandas
-networkx
-osmnx
+tkinter
 streamlit
 streamlit_lottie
 streamlit_folium
 altair
+geopandas
+networkx
+osmnx
 folium
 branca
 git+https://github.com/giswqs/leafmap
-git+https://github.com/giswqs/geemap
