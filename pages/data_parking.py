@@ -8,6 +8,7 @@ import datetime
 
 def app():
     st.title('Parking Data')
+    st.write(st.session_state.screen_height, st.session_state.screen_width)
 
     # 定义全局变量，表示提示信息的占位符
     global info_st
@@ -37,22 +38,20 @@ def app():
 
     info_st.success("Done!")
 
-    with st.expander("Time series data visualization"):
-        # Time series data visualization
-        st.write('---')
-        st.altair_chart(
-            plot_altair(parking_data_create, locations_create), 
-            use_container_width=True
-            )
+    # Time series data visualization
+    st.write('---')
+    st.altair_chart(
+        plot_altair(parking_data_create, locations_create), 
+        use_container_width=True
+        )
 
-    with st.expander("Geospatial Visualization"):
-        # Geospatial Visualization
-        st.write('---')
-        time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
-        lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
-        m = folium.Map(location=(lat, lon), zoom_start=14)
-        folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
-        folium_static(m)
+    # Geospatial Visualization
+    st.write('---')
+    time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
+    lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
+    m = folium.Map(location=(lat, lon), zoom_start=14)
+    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
+    folium_static(m, width=st.session_state.screen_width/2, height=st.session_state.screen_height/2)
    
 
 @st.cache
@@ -138,8 +137,8 @@ def plot_altair(parking_data, locations):
     color_scale = alt.Scale(domain=[True, False], range=['#F5B041', '#5DADE2'])
     # 定义全局配置
     base = alt.Chart(long_data).properties(
-        width=350,
-        height=200
+        width=st.session_state.screen_width/4,
+        height=st.session_state.screen_height/4
     ).add_selection(selection)
     # 位置散点图
     scatter = base.mark_circle().encode(

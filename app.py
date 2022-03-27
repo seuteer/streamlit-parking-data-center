@@ -2,6 +2,7 @@ import datetime
 import streamlit as st
 from streamlit.server.server import Server
 from multiapp import MultiPage
+from tkinter import *
 from pages import (
 	data_geographic,
 	data_parking,
@@ -29,6 +30,10 @@ st.session_state.data_temp = './data/temp/'
 st.session_state.date_time=datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(hours=8)  # 北京时间
 sessions = Server.get_current()._session_info_by_id
 st.session_state.current_persons = len(sessions)  # 在线人数
+# 获取屏幕尺寸
+base = Tk()
+st.session_state.screen_height = base.winfo_screenheight()
+st.session_state.screen_width = base.winfo_screenwidth()
 
 
 # 实例化MultiPage对象
