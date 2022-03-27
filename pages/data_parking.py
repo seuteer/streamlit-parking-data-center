@@ -37,20 +37,22 @@ def app():
 
     info_st.success("Done!")
 
-    # Time series data visualization
-    st.write('---')
-    st.altair_chart(
-        plot_altair(parking_data_create, locations_create), 
-        use_container_width=True
-        )
+    with st.container():
+        # Time series data visualization
+        st.write('---')
+        st.altair_chart(
+            plot_altair(parking_data_create, locations_create), 
+            use_container_width=True
+            )
 
-    # Geospatial Visualization
-    st.write('---')
-    time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
-    lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
-    m = folium.Map(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
-    folium_static(m, width=900, height=600)
+    with st.container():
+        # Geospatial Visualization
+        st.write('---')
+        time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
+        lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
+        m = folium.Map(location=(lat, lon), zoom_start=14)
+        folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
+        folium_static(m, width=900, height=600)
    
 
 @st.cache
