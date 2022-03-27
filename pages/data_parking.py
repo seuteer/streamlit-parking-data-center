@@ -168,14 +168,14 @@ def plot_altair(parking_data, locations):
     )
     # 置信区间图
     line = base.mark_line().encode(
-        x='hours(datetime):O',
+        x='hour',
         y=alt.Y('mean(OccupancyRate):Q', scale=alt.Scale(domain=[0,1])),
         color=alt.Color('is_weekends', legend=None, scale=color_scale)
     ).transform_filter(
         selection
     )
     band = base.mark_errorband(extent='ci').encode(
-        x='hours(datetime):O',
+        x='hour',
         y=alt.Y('OccupancyRate:Q', scale=alt.Scale(domain=[0,1])),
         color=alt.Color('is_weekends', legend=None, scale=color_scale)
     ).transform_filter(
