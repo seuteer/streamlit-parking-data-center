@@ -2,13 +2,12 @@
 
 import folium
 import streamlit as st
-from streamlit_folium import folium_static
 import pandas as pd
 import datetime
+import streamlit.components.v1 as components  # 自定义组件显示 folium,altair 的 html
 
 def app():
     st.title('Parking Data')
-    st.write(st.session_state.screen_height, st.session_state.screen_width)
 
     # 定义全局变量，表示提示信息的占位符
     global info_st
@@ -40,10 +39,8 @@ def app():
 
     # Time series data visualization
     st.write('---')
-    st.altair_chart(
-        plot_altair(parking_data_create, locations_create), 
-        use_container_width=True
-        )
+    fig_altair = plot_altair(parking_data_create, locations_create)
+    st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
 
     # Geospatial Visualization
     st.write('---')
@@ -51,7 +48,8 @@ def app():
     lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
     m = folium.Map(location=(lat, lon), zoom_start=14)
     folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
-    folium_static(m, width=st.session_state.screen_width/2, height=st.session_state.screen_height/2)
+    fig_folium = folium.Figure().add_child(m)
+    components.html(html=fig_folium.render(), height=500)  # 宽度自适应
    
 
 @st.cache
@@ -137,8 +135,8 @@ def plot_altair(parking_data, locations):
     color_scale = alt.Scale(domain=[True, False], range=['#F5B041', '#5DADE2'])
     # 定义全局配置
     base = alt.Chart(long_data).properties(
-        width=st.session_state.screen_width/4,
-        height=st.session_state.screen_height/4
+        width=350,
+        height=200
     ).add_selection(selection)
     # 位置散点图
     scatter = base.mark_circle().encode(
