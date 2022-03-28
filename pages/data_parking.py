@@ -8,39 +8,37 @@ import streamlit.components.v1 as components  # 自定义组件显示 folium,alt
 
 def app():
     st.title('Parking Data')
-
-    # 定义全局变量，表示提示信息的占位符
-    global info_st
-    info_st = st.empty()
+    st.write("---")
+    st.session_state.info_st.success("停车场时间序列探索与分析👇")
 
     # load data
     parking_data, locations = load_data()
-    with st.expander('parking data and locations'):
+    with st.expander('原始数据：停车场时间序列+停车场空间坐标👇'):
         st.write('parking data', parking_data)
         st.write('locations', locations)
 
     # remove parking no space
     parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
-    info_st.info('remove parking no space...')
+    st.session_state.info_st.info('删除无空间属性停车场...')
 
     # create OccupancyRate
     parking_data_create = create_or(parking_data_remove)
-    info_st.info('create OccupancyRate...')
+    st.session_state.info_st.info('创建停车占有率指标...')
 
     # create CorrelationMatrix
     timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
-    info_st.info('create CorrelationMatrix...')
-    with st.expander('data processing'):
+    st.session_state.info_st.info('创建空间自相关指标...')
+    with st.expander('处理数据：带有占有率和空间相关性的停车场数据👇'):
         st.write('parking data with OccupancyRate', parking_data_create)
         st.write('locations with CorrelationMatrix', locations_create)
         st.write('timeSeriesFeatures', timeSeriesFeatures)
 
-    info_st.success("Done!")
+    st.session_state.info_st.success("Done!")
 
     # Time series data visualization
     st.write('---')
     fig_altair = plot_altair(parking_data_create, locations_create)
-    st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
+    st.altair_chart(fig_altair)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
 
     # Geospatial Visualization
     st.write('---')
@@ -49,7 +47,7 @@ def app():
     m = folium.Map(location=(lat, lon), zoom_start=14)
     folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
     fig_folium = folium.Figure().add_child(m)
-    components.html(html=fig_folium.render(), height=500)  # 宽度自适应
+    components.html(html=fig_folium.render(), height=600)  # 宽度自适应
    
 
 @st.cache
@@ -135,7 +133,7 @@ def plot_altair(parking_data, locations):
     color_scale = alt.Scale(domain=[True, False], range=['#F5B041', '#5DADE2'])
     # 定义全局配置
     base = alt.Chart(long_data).properties(
-        width=350,
+        width=300,
         height=200
     ).add_selection(selection)
     # 位置散点图

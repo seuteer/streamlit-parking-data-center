@@ -14,10 +14,9 @@ import leafmap.foliumap as leafmap
 
 def app():
     st.title('Geographic Data')
+    st.write("---")
+    st.session_state.info_st.success("停车场空间数据获取与可视化👇")
 
-    # 定义全局变量，表示提示信息的占位符
-    global info_st
-    info_st = st.empty()
     gpkg_path = os.path.join(st.session_state.data_temp, 'birmingham.gpkg')
 
     # 获取存储地理数据的字典，并保存数据到本地
@@ -39,7 +38,7 @@ def app():
             # 默认首选的元素
             ['parking']
         )
-        info_st.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
+        st.session_state.info_st.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
         m = leafmap.Map()
         m.add_basemap(basemap=basemap)
@@ -125,13 +124,13 @@ def dowmload_osm_data(gpkg_path):
 
     # 首先读取数据，若失败则下载数据
     if os.path.exists(gpkg_path):
-        info_st.info("正在加载云端数据...")
+        st.session_state.info_st.info("正在加载云端数据...")
         for layer in dict_layer_gdf.keys():
             dict_layer_gdf[layer] = gpd.read_file(gpkg_path, layer=layer)
-        info_st.success("云端数据加载完毕!")
+        st.session_state.info_st.success("云端数据加载完毕!")
     else:
         # 停车场点要素
-        info_st.info("parking download...")
+        st.session_state.info_st.info("parking download...")
         df = gpd.read_file(os.path.join(st.session_state.data_input, 'bmh_location.csv'))
         df[['longtitude', 'latitude']] = df[['longtitude', 'latitude']].apply(pd.to_numeric)
         dict_layer_gdf['parking'] = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.longtitude, df.latitude), crs=pyproj.CRS("WGS84"))
@@ -140,18 +139,18 @@ def dowmload_osm_data(gpkg_path):
         dew, dns = (east-west)/2, (north-south)/2
         west, south, east, north = west-dew, south-dns, east+dew, north+dns
         # 道路网节点和线
-        info_st.info("roads download...")
+        st.session_state.info_st.info("roads download...")
         graph = ox.graph_from_bbox(north, south, east, west, network_type="drive", clean_periphery=True)
         # 网络分析
-        info_st.info("network analysis...")
+        st.session_state.info_st.info("network analysis...")
         graph_analysis = network_analysis(graph=graph)
         dict_layer_gdf['nodes'], dict_layer_gdf['edges'] = ox.graph_to_gdfs(graph_analysis)
         # POI
-        info_st.info("pois download...")
+        st.session_state.info_st.info("pois download...")
         pois = ox.geometries_from_bbox(north, south, east, west, tags={"amenity": True})
         dict_layer_gdf['pois'] = pois[pois['geometry'].type.isin(['Point'])]  # 筛选点要素
         # 建筑实体
-        info_st.info("buildings download...")
+        st.session_state.info_st.info("buildings download...")
         buildings = ox.geometries_from_bbox(north, south, east, west, tags={"building": True})
         dict_layer_gdf['buildings'] = buildings[buildings['geometry'].type.isin(['Polygon'])]  # 保留 Polygon 面要素
         # 保存下载后的数据到gpkg
@@ -163,7 +162,7 @@ def dowmload_osm_data(gpkg_path):
 def gdfs_to_gpkg(dict_layer_gdf, gpkg_path):
     # 批量保存 gdf 数据
     for layer, gdf in dict_layer_gdf.items():
-        info_st.info(layer + " saving...")
+        st.session_state.info_st.info(layer + " saving...")
         # 为了成功保存，转换数据类型为字符串
         gdf = gdf.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
         gdf.to_file(filename=gpkg_path, driver='GPKG', layer=layer)
@@ -172,14 +171,14 @@ def gdfs_to_gpkg(dict_layer_gdf, gpkg_path):
 def network_analysis(graph):
     import networkx as nx
     graph_analysis = graph
-    info_st.info("正在计算道路中心度...")
+    st.session_state.info_st.info("正在计算道路中心度...")
     edge_centrality = nx.closeness_centrality(nx.line_graph(graph_analysis))
     nx.set_edge_attributes(graph_analysis, edge_centrality, "edge_centrality")
-    info_st.info("正在计算道路速度和行驶时间...")
+    st.session_state.info_st.info("正在计算道路速度和行驶时间...")
     graph_analysis = ox.speed.add_edge_speeds(graph_analysis)
     graph_analysis = ox.speed.add_edge_travel_times(graph_analysis)
     # 计算节点高程 elevation 及道路坡度 grade 需要准备网络区域的DEM高程数据
-    info_st.info("正在计算节点高程及道路坡度...")
+    st.session_state.info_st.info("正在计算节点高程及道路坡度...")
     ox.elevation.add_node_elevations_raster(G=graph_analysis, filepath=os.path.join(st.session_state.data_input, 'DEM-birmingham.tif'), cpus=1)
     ox.elevation.add_edge_grades(G=graph_analysis, add_absolute=True)
     # 返回处理后的网络节点和边

@@ -17,44 +17,28 @@ def app():
     
     # Part 1
     with st.container():
-        st.write("---")
-        # 分两列
-        col_left, col_right = st.columns(2)
-        with col_left:
-            st.header("About Me")
-            st.info("""
-            Hi, I am a student in SEU.  
-            [This is my Github](https://github.com/seuteer)  
-            [Learn More About Me...](https://seuteer.icu/)  
-            """)
-        with col_right:
-            # 每个带有键的小部件都会自动添加到会话状态
-            st_lottie(lottie_logo, height=300, key='logo')
-
-    # Part 2
-    with st.container():
         st.write('---')
-        # 鬼刀
-        st.header('Background')
+        st.header('Introduction')
+
         col_img, col_text = st.columns((1,2))  # 自定义占比(1,2)
         with col_img:
             st.image(img_bg_gd)
         with col_text:
-            st.info('鬼刀')
-        # 千与千寻
+            st.info('地理数据处理')
+
         col_img, col_text = st.columns((1,2))
         with col_img:
             st.image(img_bg_qyqx)
         with col_text:
-            st.info('千与千寻')
-        # 薇尔莉特
+            st.info('时间序列分析')
+
         col_img, col_text = st.columns((1,2))
         with col_img:
             st.image(img_bg_welt)
         with col_text:
-            st.info('薇尔莉特')
+            st.info('模型构建')
 
-    # Part 3
+    # Part 2
     with st.container():
         st.write('---')
         st.header('Contact Me')
@@ -72,11 +56,8 @@ def app():
         with col_left:
             st.markdown(contact_form, unsafe_allow_html=True)
         with col_right:
-            st.info("""
-            您可以通过填写表单给我发邮箱信息！  
-            期待与您的联系！
-            """)
-
+            # 每个带有键的小部件都会自动添加到会话状态
+            st_lottie(lottie_logo, height=300, key='logo')
 
 # 通过url下载lottie中的元素
 st.cache

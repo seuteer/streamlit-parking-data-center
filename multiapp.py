@@ -19,8 +19,9 @@ class MultiPage:
 	# 定义运行函数，当选择某页面时执行该页面
 	def run(self):
 
-		st.sidebar.write('正在播放 稻香-周杰伦 :musical_note:')
-		st.sidebar.audio('./musics/稻香-周杰伦.mp3', format='audio/mp3')
+		# st.sidebar.write('正在播放 稻香-周杰伦 :musical_note:')
+		# st.sidebar.audio('./musics/稻香-周杰伦.mp3', format='audio/mp3')
+		st.session_state.info_st.success('请尝试导航下拉框探索不同页面！')
 
 		# 使用侧边栏下拉框选择页面
 		page = st.sidebar.selectbox(
