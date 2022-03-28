@@ -19,6 +19,8 @@ class MultiPage:
 	# 定义运行函数，当选择某页面时执行该页面
 	def run(self):
 
+		st.session_state.info_st.info('请点击👇导航栏选择不同页面')
+
 		# 使用侧边栏下拉框选择页面
 		st.sidebar.title("Navigation")
 		page = st.sidebar.radio(

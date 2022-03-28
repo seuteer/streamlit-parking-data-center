@@ -25,12 +25,16 @@ def app():
     st.session_state.info_st.success("Done!")
 
     # Geospatial Visualization
+    col1, col2 = st.columns((3,1))
     time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
     lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
     m = folium.Map(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=50).add_to(m)
+    with col2:
+        radius = st.slider('请选择热力图范围：', 30, 100, 50)
+    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=radius).add_to(m)
     fig_folium = folium.Figure().add_child(m)
-    components.html(html=fig_folium.render(), height=600)  # 宽度自适应
+    with col1:
+        components.html(html=fig_folium.render(), height=500)  # 宽度自适应
 
     # Time series data visualization
     st.write("---")

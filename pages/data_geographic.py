@@ -74,12 +74,13 @@ def app():
                 df_pois['longitude'] = dict_layer_gdf['pois']['geometry'].x
                 df_pois['latitude'] = dict_layer_gdf['pois']['geometry'].y
                 df_pois['value'] = 1  # 创建热力图的值字段
-                # m.add_points_from_xy(df_pois, popup=['name'], layer_name='pois')  # 此版本无法在streamlit中使用Marker Cluster
-                m.add_heatmap(df_pois, value="value", radius=15, name='pois')
+                radius = row1_col2.slider('请选择热力图范围：', 5, 30, 15)
+                m.add_heatmap(df_pois, value="value", radius=radius, name='pois')
             elif layer == 'edges':
                 edges = dict_layer_gdf['edges']
                 edges['edge_centrality'] = round(edges['edge_centrality'].astype(dtype="float64"), 5)  # 此处会改变输出结果的值，我们是允许的
                 edges['length'] = round(edges['length'].astype(dtype="float64"), 1)
+                edges['lanes'] = edges['lanes'].apply(lambda x: x if x!='nan' else 1)
                 colormap = branca.colormap.LinearColormap(
                     vmin=edges['edge_centrality'].quantile(0.0),  # 0分位数
                     vmax=edges['edge_centrality'].quantile(1),  # 1分位数
@@ -88,11 +89,11 @@ def app():
                 m.add_gdf(
                     dict_layer_gdf['edges'],
                     layer_name='edges',
-                    style_callback=lambda x: {"color": colormap(x["properties"]["edge_centrality"]),},
+                    style_callback=lambda x: {"color": colormap(x["properties"]["edge_centrality"]), "weight": x["properties"]["lanes"]},
                     tooltip=folium.GeoJsonTooltip(
                         fields=['name','edge_centrality','length','speed_kph','travel_time','grade'], 
                         aliases=['道路名称','道路中心度','道路长度(m)','行驶速度(km/h)','行驶时间(s)','平均坡度(%)']),
-                    hover_style={"color": 'black'},
+                    hover_style={"fillColor": "#ffaf00", "color": "green", "weight": 3},
                     zoom_to_layer=False
                 )
             elif layer == 'buildings':
