@@ -36,7 +36,7 @@ def app():
             # 列出所有图层
             list(dict_layer_gdf.keys()),
             # 默认首选的元素
-            ['parking']
+            ['parking', 'pois']
         )
         st.session_state.info_st.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
