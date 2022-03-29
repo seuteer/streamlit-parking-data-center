@@ -22,9 +22,9 @@ def app():
     # create CorrelationMatrix
     timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
     st.session_state.info_st.info('创建空间自相关指标...')
-    st.session_state.info_st.success("Done!")
 
     # Geospatial Visualization
+    st.session_state.info_st.info("正在提取时间序列热力图...")
     col1, col2 = st.columns((3,1))
     time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
     lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
@@ -51,6 +51,8 @@ def app():
             st.write('parking data with OccupancyRate', parking_data_create)
             st.write('locations with CorrelationMatrix', locations_create)
             st.write('timeSeriesFeatures', timeSeriesFeatures)
+
+    st.session_state.info_st.success("Done!")
 
 @st.cache
 def load_data():

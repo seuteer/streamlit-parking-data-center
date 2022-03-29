@@ -20,19 +20,19 @@ def app():
         st.write('---')
         st.header('Introduction')
 
-        col_img, col_text = st.columns((1,2))  # 自定义占比(1,2)
+        col_img, col_text = st.columns((2,1))
         with col_img:
             st.image(img_bg_gd)
         with col_text:
             st.info('地理数据处理')
 
-        col_img, col_text = st.columns((1,2))
+        col_img, col_text = st.columns((2,1))
         with col_img:
             st.image(img_bg_qyqx)
         with col_text:
             st.info('时间序列分析')
 
-        col_img, col_text = st.columns((1,2))
+        col_img, col_text = st.columns((2,1))
         with col_img:
             st.image(img_bg_welt)
         with col_text:
