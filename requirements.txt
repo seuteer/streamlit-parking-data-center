@@ -1,9 +1,9 @@
+git+https://github.com/giswqs/leafmap
 geopandas
 networkx
 osmnx
-streamlit
-streamlit_lottie
 altair
 folium
 branca
-git+https://github.com/giswqs/leafmap
+streamlit==1.7.0
+streamlit_lottie
