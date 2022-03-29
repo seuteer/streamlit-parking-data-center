@@ -7,4 +7,5 @@ folium
 branca
 streamlit
 streamlit_lottie
+streamlit_option_menu
 click==8.0.4
