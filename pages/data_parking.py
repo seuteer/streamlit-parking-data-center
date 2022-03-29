@@ -39,7 +39,7 @@ def app():
     # Time series data visualization
     st.write("---")
     fig_altair = plot_altair(parking_data_create, locations_create)
-    st.altair_chart(fig_altair)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
+    st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
 
     col1, col2 = st.columns(2)
     with col1:
@@ -192,8 +192,9 @@ def plot_altair(parking_data, locations):
     )
     fig = alt.vconcat(
         (scatter | sequential),
-        ((band + line) | table)
+        ((band + line) | table),
     )
+
     return fig
 
 @st.cache
