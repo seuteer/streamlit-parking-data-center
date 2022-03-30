@@ -199,10 +199,11 @@ def plot_altair(parking_data, locations):
 
     return fig
 
-@st.cache
+@st.cache(suppress_st_warning=True)
 def plot_folium(locations, data_space):
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
     time_list = []
+    download_prog = st.progress(0); i=0
     for time_id in range(len(data_space)):
         parking_list = []
         for parking_id in SystemCodeNumber:
@@ -212,6 +213,7 @@ def plot_folium(locations, data_space):
                 data_space[parking_id][time_id]
             ])
         time_list.append(parking_list)
+        i+=1/len(data_space); download_prog.progress(i)
     data_space = data_space.reset_index()
     time_index = list(data_space['LastUpdated'].astype(dtype="str"))
     return time_list, time_index

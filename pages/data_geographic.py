@@ -5,7 +5,6 @@ import streamlit as st
 import geopandas as gpd
 import osmnx as ox
 import pandas as pd
-import numpy as np
 import leafmap.foliumap as leafmap
 
 
@@ -33,17 +32,11 @@ def app():
     plot_leafmap(dict_layer_gdf)
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def dowmload_osm_data(gpkg_path, update):
     import pyproj
     dict_layer_gdf = {}  # 定义存储地理数据的字典
-    if not update and os.path.exists(gpkg_path):
-        # 如果不更新数据且存在数据的话
-        temp = st.info("正在加载云端数据...")
-        for layer in ['parking', 'pois', 'buildings', 'nodes', 'edges']:
-            dict_layer_gdf[layer] = gpd.read_file(gpkg_path, layer=layer)
-        temp.success("云端数据加载完毕!")
-    else:
+    if update or not os.path.exists(gpkg_path):
+        # 若更新或不存在地理数据，则下载地理数据 
         # 停车场点要素
         temp = st.info("parking download...")
         df = gpd.read_file(os.path.join(st.session_state.data_input, 'bmh_location.csv'))
@@ -66,17 +59,29 @@ def dowmload_osm_data(gpkg_path, update):
         buildings = ox.geometries_from_bbox(north, south, east, west, tags={"building": True})
         dict_layer_gdf['buildings'] = buildings[buildings['geometry'].type.isin(['Polygon'])]  # 保留 Polygon 面要素
         temp.success("地理数据更新完毕！")
+    else:
+        # 若不更新且存在地理数据文件，先从缓存加载，没有就从云端加载
+        if 'dict_layer_gdf' in st.session_state:
+            dict_layer_gdf = st.session_state.dict_layer_gdf
+        else:
+            temp = st.info("正在加载云端数据...")
+            for layer in ['parking', 'pois', 'buildings', 'nodes', 'edges']:
+                dict_layer_gdf[layer] = gpd.read_file(gpkg_path, layer=layer)
+            temp.success("云端数据加载完毕!")
+    # 添加到缓存中，避免二次加载
+    st.session_state.dict_layer_gdf = dict_layer_gdf
     return dict_layer_gdf
 
 def network_analysis(dict_layer_gdf, gpkg_path, update):
     import networkx as nx
-    if not update and len(dict_layer_gdf.keys())==5:
-        # 如果不更新且存在节点和边数据的话（默认不显示网络分析）
-        pass
-    elif not os.path.exists(gpkg_path.replace('.gpkg', '.graphml')):
-        # 如果不存在网络文件，则抛出异常
+    if not os.path.exists(gpkg_path.replace('.gpkg', '.graphml')):
+        # 如果不存在道路网络文件，则抛出异常
         st.session_state.info_st.error("未发现网络文件，请更新地理数据！")
+    elif not update and len(dict_layer_gdf.keys())==5:
+        # 如果不更新且存在节点和边数据，默认不显示网络分析
+        pass
     else:
+        # 如果更新或不存在节点和边的数据，则进行网络分析
         graph = ox.load_graphml(filepath=gpkg_path.replace('.gpkg', '.graphml'))
         temp = st.info("正在计算网络的基本描述性几何和拓扑度量...")
         G_proj = ox.project_graph(graph)  # 网络投影
@@ -131,7 +136,7 @@ def gdfs_to_gpkg(dict_layer_gdf, gpkg_path):
             # 为了成功保存，转换数据类型为字符串
             gdf = gdf.apply(lambda c: c.astype(str) if c.name != "geometry" else c, axis=0)
             gdf.to_file(filename=gpkg_path, driver='GPKG', layer=layer)
-            i+=20; download_prog.progress(i)  # 模型进度为0-100
+            i+=1/len(dict_layer_gdf); download_prog.progress(i)  # 模型进度为0.0-1.0
         temp.success("地理数据存储完毕！")
 
 def plot_leafmap(dict_layer_gdf):
