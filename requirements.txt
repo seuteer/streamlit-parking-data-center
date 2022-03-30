@@ -1,6 +1,6 @@
+GDAL-1.11.2-cp27-none-win32.whl
+rasterio-0.24.0-cp27-none-win32.whl
 git+https://github.com/giswqs/leafmap
-rasterio
-gdal
 geopandas
 networkx
 osmnx
