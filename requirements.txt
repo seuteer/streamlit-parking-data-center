@@ -1,6 +1,4 @@
-GDAL-1.11.2-cp27-none-win32.whl
-rasterio-0.24.0-cp27-none-win32.whl
-git+https://github.com/giswqs/leafmap
+gdal
 geopandas
 networkx
 osmnx
@@ -10,3 +8,4 @@ branca
 streamlit
 streamlit_lottie
 streamlit_option_menu
+git+https://github.com/giswqs/leafmap
