@@ -8,4 +8,4 @@ streamlit
 streamlit_lottie
 streamlit_option_menu
 git+https://github.com/giswqs/leafmap
-rasterio --no-binary
+rasterio==1.2.10
