@@ -1,4 +1,4 @@
-gdal
+--find-links=https://girder.github.io/large_image_wheels GDAL
 geopandas
 networkx
 osmnx
