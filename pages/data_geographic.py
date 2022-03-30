@@ -105,18 +105,18 @@ def network_analysis(dict_layer_gdf, gpkg_path, update):
         st.pyplot(fig=fig)
         temp.success("根据道路速度和行驶时间渲染网络！")
 
-        temp = st.info("正在计算节点高程及道路坡度...")
-        ox.elevation.add_node_elevations_raster(G=graph, filepath=os.path.join(st.session_state.data_input, 'DEM-birmingham.tif'), cpus=1)
-        ox.elevation.add_edge_grades(G=graph, add_absolute=True)
-        grades = pd.Series([d["grade_abs"] for _, _, d in ox.get_undirected(graph).edges(data=True)])
-        grades = grades.replace([np.inf, -np.inf], np.nan).dropna()
-        st.write("道路坡度平均值：{:.1f}%".format(np.mean(grades) * 100))
-        st.write("道路坡度中位数：{:.1f}%".format(np.median(grades) * 100))
-        nc = ox.plot.get_node_colors_by_attr(graph, "elevation", cmap="plasma")
-        ec = ox.plot.get_edge_colors_by_attr(graph, "grade_abs", cmap="plasma", num_bins=4, equal_size=True)
-        fig, ax = ox.plot_graph(graph, node_color=nc, node_size=20, edge_linewidth=1, edge_color=ec, bgcolor='white')
-        st.pyplot(fig=fig)
-        temp.success("根据节点高程及道路坡度渲染网络！")
+        # temp = st.info("正在计算节点高程及道路坡度...")  # 需要gdal库，安装难度太大，因此取消此功能！！！
+        # ox.elevation.add_node_elevations_raster(G=graph, filepath=os.path.join(st.session_state.data_input, 'DEM-birmingham.tif'), cpus=1)
+        # ox.elevation.add_edge_grades(G=graph, add_absolute=True)
+        # grades = pd.Series([d["grade_abs"] for _, _, d in ox.get_undirected(graph).edges(data=True)])
+        # grades = grades.replace([np.inf, -np.inf], np.nan).dropna()
+        # st.write("道路坡度平均值：{:.1f}%".format(np.mean(grades) * 100))
+        # st.write("道路坡度中位数：{:.1f}%".format(np.median(grades) * 100))
+        # nc = ox.plot.get_node_colors_by_attr(graph, "elevation", cmap="plasma")
+        # ec = ox.plot.get_edge_colors_by_attr(graph, "grade_abs", cmap="plasma", num_bins=4, equal_size=True)
+        # fig, ax = ox.plot_graph(graph, node_color=nc, node_size=20, edge_linewidth=1, edge_color=ec, bgcolor='white')
+        # st.pyplot(fig=fig)
+        # temp.success("根据节点高程及道路坡度渲染网络！")
 
         dict_layer_gdf['nodes'], dict_layer_gdf['edges'] = ox.graph_to_gdfs(graph)
     return dict_layer_gdf
@@ -207,8 +207,8 @@ def plot_leafmap(dict_layer_gdf):
                     layer_name='edges',
                     style_callback=lambda x: {"color": colormap(x["properties"]["edge_centrality"]), "weight": x["properties"]["lanes"]},
                     tooltip=folium.GeoJsonTooltip(
-                        fields=['name','edge_centrality','length','speed_kph','travel_time','grade'], 
-                        aliases=['道路名称','道路中心度','道路长度(m)','行驶速度(km/h)','行驶时间(s)','平均坡度(%)']),
+                        fields=['name','edge_centrality','length','speed_kph','travel_time'], 
+                        aliases=['道路名称','道路中心度','道路长度(m)','行驶速度(km/h)','行驶时间(s)']),
                     hover_style={"fillColor": "#ffaf00", "color": "green", "weight": 3},
                     zoom_to_layer=False
                 )
