@@ -1,6 +1,5 @@
 geopandas
 networkx
-osmnx
 altair
 folium
 branca
@@ -9,4 +8,4 @@ streamlit_lottie
 streamlit_option_menu
 git+https://github.com/giswqs/leafmap
 rasterio==1.2.10
---find-links=https://girder.github.io/large_image_wheels GDAL
+osmnx==1.1.2
