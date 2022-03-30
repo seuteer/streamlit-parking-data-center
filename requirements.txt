@@ -9,3 +9,4 @@ streamlit_lottie
 streamlit_option_menu
 git+https://github.com/giswqs/leafmap
 git+https://github.com/giswqs/geemap
+click==8.0.4
