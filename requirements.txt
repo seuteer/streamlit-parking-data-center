@@ -9,4 +9,4 @@ streamlit_lottie
 streamlit_option_menu
 git+https://github.com/giswqs/leafmap
 rasterio==1.2.10
-GDAL==3.4.0
+--find-links=https://girder.github.io/large_image_wheels GDAL
