@@ -1,0 +1,17 @@
+channels:
+  - conda-forge
+dependencies:
+  - gdal=3.4.0
+  - pip
+  - pip:
+      - geopandas
+      - networkx
+      - osmnx
+      - streamlit==1.7.0
+      - altair
+      - folium
+      - branca
+      - streamlit_lottie
+      - streamlit_option_menu
+      - git+git://github.com/giswqs/leafmap
+      - click==8.0.4
