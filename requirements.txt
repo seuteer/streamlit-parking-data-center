@@ -1,5 +1,6 @@
 geopandas
 networkx
+osmnx
 altair
 folium
 branca
@@ -7,5 +8,4 @@ streamlit
 streamlit_lottie
 streamlit_option_menu
 git+https://github.com/giswqs/leafmap
-rasterio==1.2.10
-osmnx==1.1.2
+git+https://github.com/giswqs/geemap
