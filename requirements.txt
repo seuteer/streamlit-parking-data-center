@@ -1,4 +1,6 @@
---find-links=https://girder.github.io/large_image_wheels GDAL
+git+https://github.com/giswqs/leafmap
+rasterio
+gdal
 geopandas
 networkx
 osmnx
@@ -8,4 +10,3 @@ branca
 streamlit
 streamlit_lottie
 streamlit_option_menu
-git+https://github.com/giswqs/leafmap
