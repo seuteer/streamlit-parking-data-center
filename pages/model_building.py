@@ -26,15 +26,15 @@ def app():
         '请选择模型训练的停车场:',
         data.columns
         )
-    st.session_state.parking_dict[col] = {}  # 清空停车场所有信息，重新进行模型训练过程
+    st.session_state.parking_dict[col] = {}  # 清空停车场模型，重新进行模型训练过程
 
     st.write("---")
     st.subheader("数据预处理")
-    preprocess(data, locations, col)
+    train_dataset, train_labels, test_dataset, test_labels, train_batch_dataset, test_batch_dataset = preprocess(data, locations, col)
 
     st.write("---")
     st.subheader("模型训练")
-    training(col, epochs=30)
+    training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
 
     st.write("---")
     st.subheader("模型评估")
@@ -84,25 +84,14 @@ def preprocess(data, locations, col):
     test_batch_dataset = create_batch_dataset(test_dataset, test_labels, train=False, batch_size=batch_size)
     st.write("构建批数据的目的是加速模型训练。")
     temp.success("构造时间序列数据集并进行批处理")
+    return train_dataset, train_labels, test_dataset, test_labels, train_batch_dataset, test_batch_dataset
 
-    # 缓存预处理数据集
-    st.session_state.parking_dict[col]['train_dataset'] = train_dataset
-    st.session_state.parking_dict[col]['train_labels'] = train_labels
-    st.session_state.parking_dict[col]['test_dataset'] = test_dataset
-    st.session_state.parking_dict[col]['test_labels'] = test_labels
-    st.session_state.parking_dict[col]['train_batch_dataset'] = train_batch_dataset
-    st.session_state.parking_dict[col]['test_batch_dataset'] = test_batch_dataset
-
-def training(col, epochs=30):
+def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30):
     if os.path.exists(os.path.join('./data/output/models/', col)):
         temp = st.info('模型正在从云端加载...')
         model = tf.keras.models.load_model(os.path.join('./data/output/models/', col))
         temp.success('模型及权重已成功加载！')
     else:
-        train_dataset = st.session_state.parking_dict[col]['train_dataset']
-        train_batch_dataset = st.session_state.parking_dict[col]['train_batch_dataset']
-        test_batch_dataset = st.session_state.parking_dict[col]['test_batch_dataset']
-
         temp = st.info('构建 LSTM 神经网络')
         model = keras.Sequential([
             keras.layers.LSTM(128, input_shape=train_dataset.shape[-2:], return_sequences=True),
@@ -131,6 +120,7 @@ def training(col, epochs=30):
 def evaluate():
     import sys
     import ssl
+    import time
     from pyngrok import ngrok
     import streamlit.components.v1 as components
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -142,8 +132,9 @@ def evaluate():
             if sys.platform.startswith('win'):
                 os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
                 os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
+                os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
+            time.sleep(5)  # 等待5s启动端口
             # 根据端口生成公有网址
             http_tunnel = ngrok.connect(addr='6006', proto='http')
             st.session_state.public_url = http_tunnel.public_url
