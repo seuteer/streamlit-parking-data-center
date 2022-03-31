@@ -130,28 +130,24 @@ def training(col, epochs=30):
 
 def evaluate():
     import sys
-    import time
+    import ssl
+    from pyngrok import ngrok
     import streamlit.components.v1 as components
-
-    # 获取本机ip
+    ssl._create_default_https_context = ssl._create_unverified_context
+    
     col1, col2 = st.columns(2)
     if col1.button('访问TensorBoard', help='若访问失败，尝试重新访问'):
-        if 'localhost' not in st.session_state:
+        if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
                 os.system('start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system('snap install ngrok')  # 安装ngrok
                 os.system('tensorboard --logdir ./data/output/logs/fit/ &')  # & 开启新进程
-                os.system('ngrok http 6006 &')
-            # 阻塞一定时间，等待端口启动
-            my_bar = st.progress(0)
-            for percent_complete in range(100):
-                time.sleep(0.05)
-                my_bar.progress(percent_complete + 1)
-            # 为了下次直接访问
-            st.session_state.localhost = True
-        components.iframe("http://localhost:6006/", scrolling=True, height=900)
+            # 根据端口生成公有网址
+            http_tunnel = ngrok.connect(addr='6006', proto='http')
+            st.session_state.public_url = http_tunnel.public_url
+        st.write('访问网页: ', st.session_state.public_url)
+        components.iframe(st.session_state.public_url, scrolling=True, height=900)
         # 利用重启机制关闭页面显示（实际上还能访问到，除非退出streamlit）
         if col2.button('关闭TensorBoard'):
             pass
