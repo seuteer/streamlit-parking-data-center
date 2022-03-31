@@ -135,6 +135,7 @@ def evaluate():
 
     # 获取本机ip
     host=get_host_ip()
+    host='10.208.137.210'
     col1, col2 = st.columns(2)
     if col1.button('访问TensorBoard', help='若访问失败，尝试重新访问'):
         if 'localhost' not in st.session_state:
