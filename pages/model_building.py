@@ -134,16 +134,14 @@ def evaluate():
     import streamlit.components.v1 as components
 
     # 获取本机ip
-    host=get_host_ip()
-    host='10.208.137.210'
     col1, col2 = st.columns(2)
     if col1.button('访问TensorBoard', help='若访问失败，尝试重新访问'):
         if 'localhost' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
-                os.system(f'start tensorboard --logdir ./data/output/logs/fit/ --host={host}')  # start 开启新进程
+                os.system(f'start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system(f'tensorboard --logdir ./data/output/logs/fit/ --host={host} &')  # & 开启新进程
+                os.system(f'tensorboard --logdir ./data/output/logs/fit/ &')  # & 开启新进程
             # 阻塞一定时间，等待端口启动
             my_bar = st.progress(0)
             for percent_complete in range(100):
@@ -151,7 +149,7 @@ def evaluate():
                 my_bar.progress(percent_complete + 1)
             # 为了下次直接访问
             st.session_state.localhost = True
-        components.iframe(f"http://{host}:6006/", scrolling=True, height=900)
+        components.iframe("http://localhost:6006/", scrolling=True, height=900)
         # 利用重启机制关闭页面显示（实际上还能访问到，除非退出streamlit）
         if col2.button('关闭TensorBoard'):
             pass
@@ -207,15 +205,3 @@ def plot_predict(Ytest, Ypred):
     plt.legend(fontsize=10)
     st.pyplot(fig)
     return r2,rmse
-
-
-# 查询本机ip地址
-def get_host_ip():
-    import socket
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-    finally:
-        s.close()
-    return ip
