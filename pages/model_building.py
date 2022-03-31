@@ -131,15 +131,19 @@ def training(col, epochs=30):
 def evaluate():
     import sys
     import time
+    import socket
     import streamlit.components.v1 as components
+
+    # 获取本机ip
+    host=socket.gethostbyname(socket.gethostname())
     col1, col2 = st.columns(2)
-    if col1.button('访问TensorBoard'):
+    if col1.button('访问TensorBoard', help='若访问失败，尝试重新访问'):
         if 'localhost' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
-                os.system('start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
+                os.system(f'start tensorboard --logdir ./data/output/logs/fit/ --host={host} --port=6006')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system('tensorboard --logdir ./data/output/logs/fit/ --bind_all &')  # & 开启新进程
+                os.system(f'tensorboard --logdir ./data/output/logs/fit/ --host={host} --port=6006 &')  # & 开启新进程
             # 阻塞一定时间，等待端口启动
             my_bar = st.progress(0)
             for percent_complete in range(100):
@@ -147,7 +151,7 @@ def evaluate():
                 my_bar.progress(percent_complete + 1)
             # 为了下次直接访问
             st.session_state.localhost = True
-        components.iframe("http://localhost:6006/", scrolling=True, height=900)
+        components.iframe(f"http://{host}:6006/", scrolling=True, height=900)
         # 利用重启机制关闭页面显示（实际上还能访问到，除非退出streamlit）
         if col2.button('关闭TensorBoard'):
             pass
