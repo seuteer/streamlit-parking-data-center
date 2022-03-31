@@ -136,7 +136,7 @@ def evaluate():
                 os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
             time.sleep(5)  # 等待5s启动端口
             # 根据端口生成公有网址
-            http_tunnel = ngrok.connect(addr='6006', proto='http')
+            http_tunnel = ngrok.connect(addr='6006', proto='https')
             st.session_state.public_url = http_tunnel.public_url
         st.write('访问网页: ', st.session_state.public_url)
         components.iframe(st.session_state.public_url, height=900)
