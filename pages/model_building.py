@@ -139,9 +139,11 @@ def evaluate():
         if 'localhost' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
-                os.system(f'start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
+                os.system('start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system(f'tensorboard --logdir ./data/output/logs/fit/ &')  # & 开启新进程
+                os.system('snap install ngrok')  # 安装ngrok
+                os.system('tensorboard --logdir ./data/output/logs/fit/ &')  # & 开启新进程
+                os.system('ngrok http 6006 &')
             # 阻塞一定时间，等待端口启动
             my_bar = st.progress(0)
             for percent_complete in range(100):
