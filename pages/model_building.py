@@ -139,7 +139,7 @@ def evaluate():
             if sys.platform.startswith('win'):
                 os.system('start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system('tensorboard --logdir ./data/output/logs/fit/ &')  # & 开启新进程
+                os.system('tensorboard --logdir ./data/output/logs/fit/ --bind_all &')  # & 开启新进程
             # 阻塞一定时间，等待端口启动
             my_bar = st.progress(0)
             for percent_complete in range(100):
