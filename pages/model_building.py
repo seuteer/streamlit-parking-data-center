@@ -139,7 +139,7 @@ def evaluate():
             http_tunnel = ngrok.connect(addr='6006', proto='http')
             st.session_state.public_url = http_tunnel.public_url
         st.write('访问网页: ', st.session_state.public_url)
-        components.iframe(st.session_state.public_url, scrolling=True, height=900)
+        components.iframe(st.session_state.public_url, height=900)
         # 利用重启机制关闭页面显示（实际上还能访问到，除非退出streamlit）
         if col2.button('关闭TensorBoard'):
             pass
