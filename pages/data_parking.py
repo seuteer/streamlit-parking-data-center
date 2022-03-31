@@ -40,7 +40,7 @@ def app():
     lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
     m = folium.Map(location=(lat, lon), zoom_start=14)
     with col2:
-        radius = st.slider('请选择热力图范围：', 30, 100, 50)
+        radius = st.slider('请选择热力图范围：', 30, 100, 60)
     folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=radius).add_to(m)
     fig_folium = folium.Figure().add_child(m)
     with col1:

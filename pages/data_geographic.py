@@ -157,7 +157,7 @@ def plot_leafmap(dict_layer_gdf):
             # 列出所有图层
             list(dict_layer_gdf.keys()),
             # 默认首选的元素
-            ['parking', 'pois']
+            ['parking', 'edges']
         )
         temp.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
