@@ -28,18 +28,6 @@ def app():
         )
     st.session_state.parking_dict[col] = {}  # 清空停车场所有信息，重新进行模型训练过程
 
-    # col = data.columns[0]
-    # if menu == '数据预处理':
-    #     preprocess(data, locations, col)
-    # elif menu == '模型训练':
-    #     st.subheader("构建 LSTM 神经网络")
-    #     st.subheader("定义 Tensorboard 日志")
-    #     st.subheader("编译、训练并保存模型")
-    # elif menu == '模型评估':
-    #     st.subheader("TensorBoard 面板分析")
-    # elif menu == '模型预测':
-    #     st.subheader("训练集和测试集的预测")
-
     st.write("---")
     st.subheader("数据预处理")
     preprocess(data, locations, col)
