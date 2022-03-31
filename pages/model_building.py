@@ -68,7 +68,7 @@ def preprocess(data, locations, col):
     line = alt.Chart(altdata).mark_line().encode(
         x='index:Q',
         y=f'{col}:Q',
-        color=alt.Color('train_valid:N'),
+        color=alt.Color('train_valid:N', legend=None),
     ).interactive()
     st.altair_chart(line, use_container_width=True)
     temp.success("划分训练集和测试集")
