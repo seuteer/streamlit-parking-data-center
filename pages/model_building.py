@@ -140,9 +140,10 @@ def evaluate():
         if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
-                os.system('start tensorboard --logdir ./data/output/logs/fit/')  # start 开启新进程
+                os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
             elif sys.platform.startswith('linux'):
-                os.system('tensorboard --logdir ./data/output/logs/fit/ &')  # & 开启新进程
+                os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
+                os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
             # 根据端口生成公有网址
             http_tunnel = ngrok.connect(addr='6006', proto='http')
             st.session_state.public_url = http_tunnel.public_url
