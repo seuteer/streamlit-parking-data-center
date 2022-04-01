@@ -91,24 +91,33 @@ def network_analysis(dict_layer_gdf, gpkg_path, update):
         st.json(stats_dict)
         temp.success("网络的基本描述性几何和拓扑度量计算完毕！")
 
-        temp = st.info("正在计算道路中心度...")
+        temp = st.info("正在计算道路长度和中心度...")
         edge_centrality = nx.closeness_centrality(nx.line_graph(graph))
         nx.set_edge_attributes(graph, edge_centrality, "edge_centrality")
-        ec = ox.plot.get_edge_colors_by_attr(graph, "edge_centrality", cmap="inferno")
-        fig, ax = ox.plot_graph(graph, edge_color=ec, edge_linewidth=1, node_size=0, bgcolor='white')
-        st.pyplot(fig=fig)
-        temp.success("根据道路中心度渲染网络！")
+        ec_len = ox.plot.get_edge_colors_by_attr(graph, "length", cmap="Reds")
+        fig_len, ax = ox.plot_graph(graph, edge_color=ec_len, edge_linewidth=1, node_size=0, bgcolor='white')
+        ec_cen = ox.plot.get_edge_colors_by_attr(graph, "edge_centrality", cmap="inferno")
+        fig_cen, ax = ox.plot_graph(graph, edge_color=ec_cen, edge_linewidth=1, node_size=0, bgcolor='white')
+        col1, col2 = st.columns(2)
+        with col1.expander("道路长度", expanded=True):
+            st.pyplot(fig=fig_len)
+        with col2.expander("道路中心度", expanded=True):
+            st.pyplot(fig=fig_cen)
+        temp.success("根据道路长度和中心度渲染网络！")
 
-        temp = st.info("正在计算道路速度和行驶时间...")
+        temp = st.info("正在计算道路行驶时间和速度...")
         graph = ox.speed.add_edge_speeds(graph)
         graph = ox.speed.add_edge_travel_times(graph)
-        ec_speed = ox.plot.get_edge_colors_by_attr(graph, "speed_kph", cmap="inferno")
-        fig, ax = ox.plot_graph(graph, edge_color=ec_speed, edge_linewidth=1, node_size=0, bgcolor='white')
-        st.pyplot(fig=fig)
-        ec_time = ox.plot.get_edge_colors_by_attr(graph, "travel_time", cmap="inferno")
-        fig, ax = ox.plot_graph(graph, edge_color=ec_time, edge_linewidth=1, node_size=0, bgcolor='white')
-        st.pyplot(fig=fig)
-        temp.success("根据道路速度和行驶时间渲染网络！")
+        ec_speed = ox.plot.get_edge_colors_by_attr(graph, "speed_kph", cmap="cool")
+        fig_speed, ax = ox.plot_graph(graph, edge_color=ec_speed, edge_linewidth=1, node_size=0, bgcolor='white')
+        ec_time = ox.plot.get_edge_colors_by_attr(graph, "travel_time", cmap="Blues")
+        fig_time, ax = ox.plot_graph(graph, edge_color=ec_time, edge_linewidth=1, node_size=0, bgcolor='white')
+        col1, col2 = st.columns(2)
+        with col1.expander("行驶时间", expanded=True):
+            st.pyplot(fig=fig_time)
+        with col2.expander("行驶速度", expanded=True):
+            st.pyplot(fig=fig_speed)
+        temp.success("根据道路行驶时间和速度渲染网络！")
 
         # temp = st.info("正在计算节点高程及道路坡度...")  # 需要gdal库，安装难度太大，因此取消此功能！！！
         # ox.elevation.add_node_elevations_raster(G=graph, filepath=os.path.join(st.session_state.data_input, 'DEM-birmingham.tif'), cpus=1)
