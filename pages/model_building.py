@@ -136,8 +136,9 @@ def evaluate():
             st.session_state.public_url = http_tunnel.public_url.replace('http:', 'https:')
         st.write('访问网页: ', st.session_state.public_url)
         components.iframe(st.session_state.public_url, height=600, scrolling=True)
-        if st.button('关闭TensorBoard'):
-            pass
+    if st.button('关闭TensorBoard'):
+        for i in ngrok.get_tunnels():
+            ngrok.disconnect(i.public_url)
 
 def prediction(col, train_dataset, train_labels, test_dataset, test_labels):
     if not os.path.exists(os.path.join('./data/output/models/', col)):
