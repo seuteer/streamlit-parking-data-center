@@ -123,18 +123,21 @@ def evaluate():
     import streamlit.components.v1 as components
     ssl._create_default_https_context = ssl._create_unverified_context
     
-    if 'public_url' not in st.session_state:
-        # 没有缓存，则启动并打开端口；有缓存直接打开端口。
-        if sys.platform.startswith('win'):
-            os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
-        elif sys.platform.startswith('linux'):
-            os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
-            os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
-        # 根据端口生成公有网址
-        http_tunnel = ngrok.connect(addr='6006', proto='http')
-        st.session_state.public_url = http_tunnel.public_url.replace('http', 'https')
-    st.write('访问网页: ', st.session_state.public_url)
-    components.iframe(st.session_state.public_url, height=600, scrolling=True)
+    if st.button('运行TensorBoard'):
+        if 'public_url' not in st.session_state:
+            # 没有缓存，则启动并打开端口；有缓存直接打开端口。
+            if sys.platform.startswith('win'):
+                os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
+            elif sys.platform.startswith('linux'):
+                os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
+                os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
+            # 根据端口生成公有网址
+            http_tunnel = ngrok.connect(addr='6006', proto='http')
+            st.session_state.public_url = http_tunnel.public_url.replace('http', 'https')
+        st.write('访问网页: ', st.session_state.public_url)
+        components.iframe(st.session_state.public_url, height=600, scrolling=True)
+        if st.button('关闭TensorBoard'):
+            pass
 
 def prediction(col, train_dataset, train_labels, test_dataset, test_labels):
     if not os.path.exists(os.path.join('./data/output/models/', col)):
