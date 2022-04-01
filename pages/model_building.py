@@ -124,7 +124,7 @@ def evaluate():
     ssl._create_default_https_context = ssl._create_unverified_context
     
     col1, col2 = st.columns(2)
-    if col1.button('运行TensorBoard', '如果运行失败, 尝试关闭TensorBoard后重新打开！'):
+    if col1.button('运行TensorBoard', help='如果运行失败, 尝试关闭TensorBoard后重新打开！'):
         if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
