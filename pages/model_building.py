@@ -115,12 +115,13 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
 def evaluate():
     import sys
     import ssl
+    import time
     from pyngrok import ngrok
     import streamlit.components.v1 as components
     ssl._create_default_https_context = ssl._create_unverified_context
     
     col1, col2 = st.columns(2)
-    if col1.button('运行TensorBoard', help='如果运行失败, 尝试关闭TensorBoard后重新打开!'):
+    if col1.button('运行TensorBoard', help='如果运行失败, 尝试重新运行TensorBoard'):
         if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
@@ -128,12 +129,13 @@ def evaluate():
             elif sys.platform.startswith('linux'):
                 os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
                 os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
+            time.sleep(3)
             # 根据端口生成公有网址
             http_tunnel = ngrok.connect(addr='6006', proto='http')
             st.session_state.public_url = http_tunnel.public_url.replace('http:', 'https:')
         st.write('访问网页: ', st.session_state.public_url)
         components.iframe(st.session_state.public_url, height=600, scrolling=True)
-    if col2.button('关闭TensorBoard'):
+    if col2.button('清空缓存', help='若页面崩溃, 清空缓存后重新运行'):
         for i in ngrok.get_tunnels():
             ngrok.disconnect(i.public_url)
 
