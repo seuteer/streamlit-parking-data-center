@@ -42,6 +42,7 @@ def app():
 
     st.write("---")
     st.subheader("模型预测")
+    prediction(col, train_dataset, train_labels, test_dataset, test_labels)
 
 
 def preprocess(data, locations, col):
@@ -92,17 +93,15 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
         model = tf.keras.models.load_model(os.path.join('./data/output/models/', col))
         temp.success('模型及权重已成功加载！')
     else:
-        temp = st.info('构建 LSTM 神经网络')
+        temp = st.info('训练 LSTM 神经网络...')
         model = keras.Sequential([
             keras.layers.LSTM(128, input_shape=train_dataset.shape[-2:], return_sequences=True),
             keras.layers.Dropout(0.5),
             keras.layers.LSTM(64),
             keras.layers.Dense(1)  # 全连接层，输出为1
         ])
-        temp.info('定义 Tensorboard 日志')
         log_dir="./data/output/logs/fit/" + col + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        temp.info('编译、训练并保存模型')
         st.write('模型优化函数: adam')
         st.write('模型损失函数: mse')
         st.write('模型训练轮次: ', epochs)
@@ -124,24 +123,33 @@ def evaluate():
     import streamlit.components.v1 as components
     ssl._create_default_https_context = ssl._create_unverified_context
     
-    col1, col2 = st.columns(2)
-    if col1.button('访问TensorBoard', help='若访问失败，尝试关闭后重新访问'):
-        if 'public_url' not in st.session_state:
-            # 没有缓存，则启动并打开端口；有缓存直接打开端口。
-            if sys.platform.startswith('win'):
-                os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
-            elif sys.platform.startswith('linux'):
-                os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
-                os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
-            # 根据端口生成公有网址
-            http_tunnel = ngrok.connect(addr='6006', proto='http')
-            st.session_state.public_url = http_tunnel.public_url.replace('http', 'https')
-        st.write('访问网页: ', st.session_state.public_url)
-        components.iframe(st.session_state.public_url, height=600, scrolling=True)
-    # 利用重启机制关闭页面显示（实际上还能访问到，除非退出streamlit）
-    if col2.button('关闭TensorBoard'):
-        pass
+    if 'public_url' not in st.session_state:
+        # 没有缓存，则启动并打开端口；有缓存直接打开端口。
+        if sys.platform.startswith('win'):
+            os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
+        elif sys.platform.startswith('linux'):
+            os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
+            os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
+        # 根据端口生成公有网址
+        http_tunnel = ngrok.connect(addr='6006', proto='http')
+        st.session_state.public_url = http_tunnel.public_url.replace('http', 'https')
+    st.write('访问网页: ', st.session_state.public_url)
+    components.iframe(st.session_state.public_url, height=600, scrolling=True)
 
+def prediction(col, train_dataset, train_labels, test_dataset, test_labels):
+    if not os.path.exists(os.path.join('./data/output/models/', col)):
+        st.session_state.info_st.error("未发现模型文件，请重新训练模型！")
+    else:
+        model = tf.keras.models.load_model(os.path.join('./data/output/models/', col))
+        col1, col2 = st.columns(2)
+        with col1.expander("训练集预测", expanded=True):
+            # 训练集的预测
+            train_pred = model.predict(train_dataset)
+            st.session_state.parking_dict[col]['train_r2'], st.session_state.parking_dict[col]['train_rmse'] = plot_predict(train_labels,train_pred)
+        with col2.expander("测试集预测", expanded=True):
+            # 测试集的预测
+            test_pred = model.predict(test_dataset)
+            st.session_state.parking_dict[col]['test_r2'], st.session_state.parking_dict[col]['test_rmse'] = plot_predict(test_labels,test_pred)
 
 # 划分训练集和测试集
 def split_dataset(X, y, train_ratio=0.8):
@@ -186,8 +194,7 @@ def create_batch_dataset(X, y, train=True, buffer_size=100, batch_size=32):
 def plot_predict(Ytest, Ypred):
     r2 = r2_score(Ytest, Ypred)
     rmse = np.sqrt(MSE(Ytest,Ypred))
-    st.write('R2:', r2)
-    st.write('RMSE:', rmse)
+    st.write('R2:', round(r2,3), ' RMSE:', round(rmse,3))
     fig = plt.figure(figsize=(8,4))
     plt.plot(range(len(Ytest)), Ytest, c='r', alpha=0.8, label='True')
     plt.plot(range(len(Ytest)), Ypred, c='b', label='Pred')
