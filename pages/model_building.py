@@ -123,7 +123,8 @@ def evaluate():
     import streamlit.components.v1 as components
     ssl._create_default_https_context = ssl._create_unverified_context
     
-    if st.button('运行TensorBoard'):
+    col1, col2 = st.columns(2)
+    if col1.button('运行TensorBoard', '如果运行失败, 尝试关闭TensorBoard后重新打开！'):
         if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
@@ -136,7 +137,7 @@ def evaluate():
             st.session_state.public_url = http_tunnel.public_url.replace('http:', 'https:')
         st.write('访问网页: ', st.session_state.public_url)
         components.iframe(st.session_state.public_url, height=600, scrolling=True)
-    if st.button('关闭TensorBoard'):
+    if col2.button('关闭TensorBoard'):
         for i in ngrok.get_tunnels():
             ngrok.disconnect(i.public_url)
 
