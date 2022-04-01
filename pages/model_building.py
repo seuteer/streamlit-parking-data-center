@@ -121,7 +121,7 @@ def evaluate():
     ssl._create_default_https_context = ssl._create_unverified_context
     
     col1, col2 = st.columns(2)
-    if col1.button('运行TensorBoard', help='如果运行失败, 尝试重新运行TensorBoard'):
+    if col1.button('TensorBoard', help='若无法显示, 尝试重新运行TensorBoard'):
         if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
@@ -136,6 +136,7 @@ def evaluate():
         st.write('访问网页: ', st.session_state.public_url)
         components.iframe(st.session_state.public_url, height=600, scrolling=True)
     if col2.button('清空缓存', help='若页面崩溃, 清空缓存后重新运行'):
+        del st.session_state.public_url
         for i in ngrok.get_tunnels():
             ngrok.disconnect(i.public_url)
 
