@@ -135,11 +135,9 @@ def evaluate():
                 os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
             # 根据端口生成公有网址
             http_tunnel = ngrok.connect(addr='6006', proto='http')
-            st.session_state.public_url = http_tunnel.public_url
+            st.session_state.public_url = http_tunnel.public_url.replace('http', 'https')
         st.write('访问网页: ', st.session_state.public_url)
-        components.iframe(st.session_state.public_url, height=900, scrolling=True)
-        components.iframe(st.session_state.public_url.replace('http', 'https'), height=900, scrolling=True)
-        components.iframe('https://seuteer.icu/', height=900, scrolling=True)
+        components.iframe(st.session_state.public_url, height=600, scrolling=True)
     # 利用重启机制关闭页面显示（实际上还能访问到，除非退出streamlit）
     if col2.button('关闭TensorBoard'):
         pass
