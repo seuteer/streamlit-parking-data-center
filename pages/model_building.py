@@ -20,13 +20,10 @@ def app():
     # 定义全局变量
     data = pd.read_csv(os.path.join(st.session_state.data_output, 'timeSeriesFeatures.csv'), index_col=0)
     locations = pd.read_csv(os.path.join(st.session_state.data_output, 'locations_processed.csv'))
-    if 'parking_dict' not in st.session_state:
-        st.session_state.parking_dict = {}  # 存储所有停车场的关于模型的所有信息
     col = st.selectbox(
         '请选择模型训练的停车场:',
         data.columns
         )
-    st.session_state.parking_dict[col] = {}  # 清空停车场模型，重新进行模型训练过程
 
     st.write("---")
     st.subheader("数据预处理")
@@ -113,8 +110,7 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
             verbose=0)  # 沉默输出
         model.save(os.path.join('./data/output/models/', col), save_format='h5')
         temp.success('模型训练完毕！')
-    # 缓存模型
-    st.session_state.parking_dict[col]['model'] = model
+
 
 def evaluate():
     import sys
@@ -124,7 +120,7 @@ def evaluate():
     ssl._create_default_https_context = ssl._create_unverified_context
     
     col1, col2 = st.columns(2)
-    if col1.button('运行TensorBoard', help='如果运行失败, 尝试关闭TensorBoard后重新打开！'):
+    if col1.button('运行TensorBoard', help='如果运行失败, 尝试关闭TensorBoard后重新打开!'):
         if 'public_url' not in st.session_state:
             # 没有缓存，则启动并打开端口；有缓存直接打开端口。
             if sys.platform.startswith('win'):
@@ -150,11 +146,11 @@ def prediction(col, train_dataset, train_labels, test_dataset, test_labels):
         with col1.expander("训练集预测", expanded=True):
             # 训练集的预测
             train_pred = model.predict(train_dataset)
-            st.session_state.parking_dict[col]['train_r2'], st.session_state.parking_dict[col]['train_rmse'] = plot_predict(train_labels,train_pred)
+            plot_predict(train_labels,train_pred)
         with col2.expander("测试集预测", expanded=True):
             # 测试集的预测
             test_pred = model.predict(test_dataset)
-            st.session_state.parking_dict[col]['test_r2'], st.session_state.parking_dict[col]['test_rmse'] = plot_predict(test_labels,test_pred)
+            plot_predict(test_labels,test_pred)
 
 # 划分训练集和测试集
 def split_dataset(X, y, train_ratio=0.8):
@@ -205,4 +201,4 @@ def plot_predict(Ytest, Ypred):
     plt.plot(range(len(Ytest)), Ypred, c='b', label='Pred')
     plt.legend(fontsize=10)
     st.pyplot(fig)
-    return r2,rmse
+    # return r2,rmse

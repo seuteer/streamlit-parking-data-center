@@ -54,7 +54,6 @@ def app():
     st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
 
 
-@st.cache
 def load_data():
     '''加载数据'''
     # 导入原始数据（停车占有率表+位置经纬度表）
@@ -62,7 +61,6 @@ def load_data():
     locations = pd.read_csv(st.session_state.data_input + 'bmh_location.csv')
     return parking_data, locations
 
-@st.cache
 def remove_parking_no_space(parking_data, locations):
     '''数据清洗'''
     # 筛选出具有空间坐标的停车场数据
@@ -74,7 +72,6 @@ def remove_parking_no_space(parking_data, locations):
     locations_remove = locations[locations['SystemCodeNumber'].isin(SystemCodeNumber)]
     return parking_data_remove, locations_remove
 
-@st.cache
 def create_or(parking_data):
     '''创建占有率指标'''
     data = parking_data.copy()  # 防止改变输入parking_data的值
@@ -90,7 +87,6 @@ def create_or(parking_data):
     data.to_csv(st.session_state.data_output + 'bhm_processed.csv', index=False)
     return data
 
-@st.cache
 def create_rs(parking_data, locations):
     '''创建时间序列相关性指标'''
     data = parking_data[['LastUpdated', 'SystemCodeNumber', 'OccupancyRate']]
@@ -114,7 +110,6 @@ def create_rs(parking_data, locations):
     locations_processed.to_csv(st.session_state.data_output + 'locations_processed.csv', index=False)
     return data_space, locations_processed
 
-@st.cache(allow_output_mutation=True)
 def plot_altair(parking_data, locations):
     import altair as alt
 
