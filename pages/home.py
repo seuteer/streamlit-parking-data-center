@@ -20,23 +20,20 @@ def app():
         st.write('---')
         st.header('Introduction')
 
-        col_img, col_text = st.columns((2,1))
-        with col_img:
+        row1col1, row1col2 = st.columns(2)
+        with row1col1:
             st.image(img_bg_gd)
-        with col_text:
-            st.info('地理数据处理')
-
-        col_img, col_text = st.columns((2,1))
-        with col_img:
-            st.image(img_bg_qyqx)
-        with col_text:
-            st.info('时间序列分析')
-
-        col_img, col_text = st.columns((2,1))
-        with col_img:
+            st.info("空间数据分析")
+        with row1col2:
             st.image(img_bg_welt)
-        with col_text:
-            st.info('模型构建')
+            st.info('时间序列分析')
+        row2col1, row2col2 = st.columns(2)
+        with row2col1:
+            st.image(img_bg_gd)
+            st.info("模型构建存储")
+        with row2col2:
+            st.image(img_bg_welt)
+            st.info('模型实时部署')
 
     # Part 2
     with st.container():
