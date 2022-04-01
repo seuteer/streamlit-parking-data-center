@@ -100,7 +100,7 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
             keras.layers.LSTM(64),
             keras.layers.Dense(1)  # 全连接层，输出为1
         ])
-        log_dir="./data/output/logs/fit/" + col + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir=f"./data/output/logs/fit/{col}/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
         st.write('模型优化函数: adam')
         st.write('模型损失函数: mse')
