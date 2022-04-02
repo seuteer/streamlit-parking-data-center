@@ -11,7 +11,7 @@ def app():
     st.title('Welcome To Parking Prediction System')
 
     # 加载缓存资源
-    lottie_logo,img_bg_gd,img_bg_qyqx,img_bg_welt = load_all_data()
+    lottie_logo,geog1,parking1,parking2,model1 = load_all_data()
     # 加载非缓存资源
     load_css('style/style.css')
     
@@ -22,17 +22,17 @@ def app():
 
         row1col1, row1col2 = st.columns(2)
         with row1col1:
-            st.image(img_bg_gd)
+            st.image(geog1)
             st.info("空间数据分析")
         with row1col2:
-            st.image(img_bg_welt)
+            st.image(parking1)
             st.info('时间序列分析')
         row2col1, row2col2 = st.columns(2)
         with row2col1:
-            st.image(img_bg_gd)
+            st.image(parking2)
             st.info("模型构建存储")
         with row2col2:
-            st.image(img_bg_welt)
+            st.image(model1)
             st.info('模型实时部署')
 
     # Part 2
@@ -79,7 +79,8 @@ def load_all_data():
     # lottie_logo = load_lottie(lottie_url)   # 从 url 获取 json 文件，受限于网速
     with open('images/logo.json', 'r') as f:
         lottie_logo = json.load(f)  # 从本地获取，读取速度更快
-    img_bg_gd = Image.open('images/bg_鬼刀.jpg')
-    img_bg_qyqx = Image.open('images/bg_千与千寻.jpg')
-    img_bg_welt = Image.open('images/bg_薇尔莉特.jpg')
-    return lottie_logo,img_bg_gd,img_bg_qyqx,img_bg_welt
+    geog1 = Image.open('images/geog1.png')
+    parking1 = Image.open('images/parking1.png')
+    parking2 = Image.open('images/parking2.png')
+    model1 = Image.open('images/model1.png')
+    return lottie_logo,geog1,parking1,parking2,model1

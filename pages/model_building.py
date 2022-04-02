@@ -133,6 +133,7 @@ def evaluate():
         components.iframe(ngrok.get_tunnels()[0].public_url, height=600, scrolling=True)
     if len(ngrok.get_tunnels()) >= 2:
         # 若网页数量大于2，则清空网页
+        st.session_state.info_st.info('TensorBoard启动失败,请刷新页面重试!')
         for i in ngrok.get_tunnels():
             ngrok.disconnect(i.public_url)
 
