@@ -15,14 +15,7 @@ st.set_page_config(
 	layout='wide',  # 页面布局
 	initial_sidebar_state='auto')  # 侧边栏
 
-# 初始化全局配置，方便不同程序文件内进行调用
-if 'first_visit' not in st.session_state:
-	st.session_state.first_visit=True
-	# st.snow()  # 第一次访问时todo
-else:
-	st.session_state.first_visit=False
-
-# 设置全局变量
+# 设置全局变量，每次运行都初始化，方便不同程序文件内进行调用
 st.session_state.data_input = './data/input/'
 st.session_state.data_output = './data/output/'
 st.session_state.data_temp = './data/temp/'
