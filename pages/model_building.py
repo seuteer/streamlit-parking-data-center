@@ -128,6 +128,10 @@ def evaluate():
             os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
         http_tunnel = ngrok.connect(addr='6006', proto='http', bind_tls=True)
     if len(ngrok.get_tunnels()) == 1:
+        if st.button('重新加载网页'):
+            for i in ngrok.get_tunnels():
+                ngrok.disconnect(i.public_url)
+            http_tunnel = ngrok.connect(addr='6006', proto='http', bind_tls=True)
         # 若已有网页，则直接获取网页
         st.write('访问网页: ', ngrok.get_tunnels()[0].public_url)
         components.iframe(ngrok.get_tunnels()[0].public_url, height=600, scrolling=True)
