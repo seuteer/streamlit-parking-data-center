@@ -1,6 +1,7 @@
 # 模型构建
 
 import os
+import sys
 import pandas as pd
 import numpy as np
 import datetime
@@ -35,37 +36,26 @@ def app():
     st.subheader("模型训练")
     training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
 
-    st.write("---")
-    st.subheader("模型评估")
-    evaluate()
+    if sys.platform.startswith('linux'):  # 为了调试方便，只在linux系统下运行
+        st.write("---")
+        st.subheader("模型评估")
+        evaluate()
 
-    st.write("---")
-    st.subheader("模型预测")
-    prediction(col, train_dataset, train_labels, test_dataset, test_labels)
+        st.write("---")
+        st.subheader("模型预测")
+        prediction(col, train_dataset, train_labels, test_dataset, test_labels)
 
     st.write('---')
     st.subheader('动态预测热力图')
     labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
     lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
-    m1 = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
-    m2 = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(
-        name='origin',
-        data=labels_list,
-        auto_play=True, radius=60, display_index=False
-    ).add_to(m1)
-    folium.plugins.HeatMapWithTime(
-        name='predict',
-        data=pred_list, 
-        auto_play=True, radius=60, display_index=False
-    ).add_to(m2)
-    col1, col2 = st.columns(2)
-    with col1:
-        fig_folium = folium.Figure().add_child(m1)
-        components.html(html=fig_folium.render(), height=500)
-    with col2:
-        fig_folium = folium.Figure().add_child(m2)
-        components.html(html=fig_folium.render(), height=500)
+    m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
+    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Test data').add_to(m.m1)
+    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Pred data').add_to(m.m2)
+    folium.LayerControl().add_to(m)
+    m.save(os.path.join(st.session_state.data_output, 'map.html'))
+    map_html = open(os.path.join(st.session_state.data_output, 'map.html'),"r",encoding='utf-8').read()
+    components.html(html=map_html, height=500)
 
 
 def preprocess(data, locations, col):
@@ -139,7 +129,6 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
 
 
 def evaluate():
-    import sys
     import ssl
     from pyngrok import ngrok
     import streamlit.components.v1 as components
@@ -233,7 +222,6 @@ def plot_predict(Ytest, Ypred):
     st.pyplot(fig)
 
 # 创建动态热力图序列
-@st.cache
 def plot_HeatMapWithTime(locations):
     parking_df = pd.read_pickle('./data/output/parking.pkl')
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
