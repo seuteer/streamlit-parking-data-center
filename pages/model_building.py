@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
+import folium
 import altair as alt
 import streamlit as st
 import tensorflow as tf
@@ -40,6 +41,23 @@ def app():
     st.write("---")
     st.subheader("模型预测")
     prediction(col, train_dataset, train_labels, test_dataset, test_labels)
+
+    st.write('---')
+    st.subheader('动态预测热力图')
+    labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
+    lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
+    m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14, tiles='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', attr='default')
+    folium.plugins.HeatMapWithTime(
+        name='origin',
+        data=labels_list,
+        auto_play=True, radius=60, display_index=False
+    ).add_to(m.m1)
+    folium.plugins.HeatMapWithTime(
+        name='predict',
+        data=pred_list, 
+        auto_play=True, radius=60, display_index=False
+    ).add_to(m.m2)
+    folium.LayerControl(collapsed=True).add_to(m)
 
 
 def preprocess(data, locations, col):
@@ -97,7 +115,7 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
             keras.layers.LSTM(64),
             keras.layers.Dense(1)  # 全连接层，输出为1
         ])
-        log_dir=f"./data/output/logs/fit/{col}/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir=f"./data/output/logs/fit/{col}/" + (datetime.datetime.now()+ datetime.timedelta(hours=8)).strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
         st.write('模型优化函数: adam')
         st.write('模型损失函数: mse')
@@ -205,4 +223,28 @@ def plot_predict(Ytest, Ypred):
     plt.plot(range(len(Ytest)), Ypred, c='b', label='Pred')
     plt.legend(fontsize=10)
     st.pyplot(fig)
-    # return r2,rmse
+
+# 创建动态热力图序列
+@st.cache
+def plot_HeatMapWithTime(locations):
+    parking_df = pd.read_pickle('./data/output/parking.pkl')
+    SystemCodeNumber = locations['SystemCodeNumber'].unique()
+    labels_list = []
+    pred_list = []
+    for time_id in range(len(parking_df.loc['test_labels'][0])):
+        parking_labels_list = []
+        parking_pred_list = []
+        for parking_id in SystemCodeNumber:
+            parking_labels_list.append([
+                locations.loc[locations['SystemCodeNumber']==parking_id, 'latitude'].values[0],
+                locations.loc[locations['SystemCodeNumber']==parking_id, 'longtitude'].values[0],
+                parking_df.loc['test_labels', parking_id][time_id]
+            ])
+            parking_pred_list.append([
+                locations.loc[locations['SystemCodeNumber']==parking_id, 'latitude'].values[0],
+                locations.loc[locations['SystemCodeNumber']==parking_id, 'longtitude'].values[0],
+                parking_df.loc['test_pred', parking_id][time_id][0]
+            ])
+        labels_list.append(parking_labels_list)
+        pred_list.append(parking_pred_list)
+    return labels_list, pred_list

@@ -38,7 +38,7 @@ def app():
     col1, col2 = st.columns((3,1))
     time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
     lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
-    m = folium.Map(location=(lat, lon), zoom_start=14)
+    m = folium.Map(location=(lat, lon), zoom_start=14, tiles='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', attr='default')
     with col2:
         radius = st.slider('请选择热力图范围：', 30, 100, 60)
     folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=radius).add_to(m)
