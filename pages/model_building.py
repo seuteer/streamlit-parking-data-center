@@ -47,20 +47,25 @@ def app():
     st.subheader('动态预测热力图')
     labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
     lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
-    m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14, tiles='https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', attr='default')
+    m1 = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
+    m2 = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
     folium.plugins.HeatMapWithTime(
         name='origin',
         data=labels_list,
         auto_play=True, radius=60, display_index=False
-    ).add_to(m.m1)
+    ).add_to(m1)
     folium.plugins.HeatMapWithTime(
         name='predict',
         data=pred_list, 
         auto_play=True, radius=60, display_index=False
-    ).add_to(m.m2)
-    folium.LayerControl(collapsed=True).add_to(m)
-    fig_folium = folium.Figure().add_child(m)
-    components.html(html=fig_folium.render(), height=700)  # 宽度自适应
+    ).add_to(m2)
+    col1, col2 = st.columns(2)
+    with col1:
+        fig_folium = folium.Figure().add_child(m1)
+        components.html(html=fig_folium.render(), height=500)
+    with col2:
+        fig_folium = folium.Figure().add_child(m2)
+        components.html(html=fig_folium.render(), height=500)
 
 
 def preprocess(data, locations, col):
