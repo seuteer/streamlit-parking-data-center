@@ -12,6 +12,7 @@ import tensorflow as tf
 from tensorflow import keras
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error as MSE
+import streamlit.components.v1 as components
 
 
 def app():
@@ -58,6 +59,8 @@ def app():
         auto_play=True, radius=60, display_index=False
     ).add_to(m.m2)
     folium.LayerControl(collapsed=True).add_to(m)
+    fig_folium = folium.Figure().add_child(m)
+    components.html(html=fig_folium.render(), height=700)  # 宽度自适应
 
 
 def preprocess(data, locations, col):
