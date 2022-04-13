@@ -221,6 +221,7 @@ def plot_predict(Ytest, Ypred):
     st.pyplot(fig)
 
 # 创建动态热力图序列
+@st.cache
 def plot_HeatMapWithTime(locations):
     parking_df = pd.read_pickle('./data/output/parking.pkl')
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
