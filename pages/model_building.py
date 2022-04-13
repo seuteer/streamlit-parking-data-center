@@ -132,13 +132,13 @@ def evaluate():
     from pyngrok import ngrok
     import streamlit.components.v1 as components
     ssl._create_default_https_context = ssl._create_unverified_context
+    os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
     
-    if len(ngrok.get_tunnels()) == 0:
+    if len(ngrok.get_tunnels()) == 0:                                            
         # 若没有网页，则开启端口生成网页
         if sys.platform.startswith('win'):
             os.system('start tensorboard --logdir ./data/output/logs/fit/ --port 6006')  # start 开启新进程
         elif sys.platform.startswith('linux'):
-            os.system(f'ngrok authtoken {st.secrets["NGROK_TOKEN"]}')
             os.system('tensorboard --logdir ./data/output/logs/fit/ --port 6006 &')  # & 开启新进程
         http_tunnel = ngrok.connect(addr='6006', proto='http', bind_tls=True)
     if len(ngrok.get_tunnels()) == 1:
