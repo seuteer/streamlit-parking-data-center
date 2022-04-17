@@ -12,7 +12,7 @@ from PIL import Image  # 加载本地图片
 # os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
 
 def app():
-    st.title('Geographic Data')
+    st.header('空间特征分析')
     st.session_state.info_st.success("地理数据获取与可视化👉")
 
     st.write("---")

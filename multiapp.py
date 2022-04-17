@@ -22,20 +22,20 @@ class MultiPage:
 		st.session_state.info_st.info('请点击导航栏选择不同页面👇')
 
 		# 使用侧边栏下拉框选择页面
-		st.sidebar.title("Navigation")
+		st.sidebar.title("导航栏")
 		page = st.sidebar.radio(
 			label='Go To',
 			options=self.pages,
 			format_func=lambda page: page['title']
 		)
 
-		st.sidebar.title("About")
-		st.sidebar.info("""
-		This web [app](https://share.streamlit.io/seuteer/streamlit_app_seuteer/main/app.py) 
-		is maintained by **seuteer**. You can follow me on social media:
-		[GitHub](https://github.com/seuteer) | [Blog](https://seuteer.icu/)
-		"""
-		)
+		# st.sidebar.title("About")
+		# st.sidebar.info("""
+		# This web [app](https://share.streamlit.io/seuteer/streamlit_app_seuteer/main/app.py) 
+		# is maintained by **seuteer**. You can follow me on social media:
+		# [GitHub](https://github.com/seuteer) | [Blog](https://seuteer.icu/)
+		# """
+		# )
 
 		st.sidebar.info(f"""
 		Current time {st.session_state.date_time.date()} / {st.session_state.date_time.time()}    

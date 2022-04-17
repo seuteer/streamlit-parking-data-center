@@ -7,7 +7,7 @@ import datetime
 import streamlit.components.v1 as components  # 自定义组件显示 folium,altair 的 html
 
 def app():
-    st.title('Parking Data')
+    st.header('时间序列分析')
     st.session_state.info_st.success("停车场时间序列探索与分析👉")
 
     st.write("---")

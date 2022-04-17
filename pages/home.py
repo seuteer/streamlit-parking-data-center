@@ -8,7 +8,7 @@ import json  # 加载本地json文件
 
 
 def app():
-    st.header('基于时空数据的停车场占有率预测及Web端可视化平台')
+    st.header('停车占有率预测可视化数据平台')
 
     # 加载缓存资源
     lottie_logo,geog1,parking1,parking2,model1 = load_all_data()
@@ -18,12 +18,12 @@ def app():
     # Part 1
     with st.container():
         st.write('---')
-        st.header('Introduction')
+        st.subheader('功能概览')
 
         row1col1, row1col2 = st.columns(2)
         with row1col1:
             st.image(geog1)
-            st.info("空间数据分析")
+            st.info("空间特征分析")
         with row1col2:
             st.image(parking1)
             st.info('时间序列分析')
@@ -33,28 +33,28 @@ def app():
             st.info("模型构建存储")
         with row2col2:
             st.image(model1)
-            st.info('模型实时部署')
+            st.info('模型实时预测')
 
-    # Part 2
-    with st.container():
-        st.write('---')
-        st.header('Contact Me')
-        # Documention: https://formsubmit.co/
-        contact_form = """
-        <form action="https://formsubmit.co/1240124885@qq.com" method="POST">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="text" name="name" placeholder="Your name" required>
-            <input type="email" name="email" placeholder="Your email" required>
-            <textarea name="message" placeholder="Your message here" required></textarea>
-            <button type="submit">Send</button>
-        </form>
-        """
-        col_left, col_right = st.columns(2)
-        with col_left:
-            st.markdown(contact_form, unsafe_allow_html=True)
-        with col_right:
-            # 每个带有键的小部件都会自动添加到会话状态
-            st_lottie(lottie_logo, height=300, key='logo')
+    # # Part 2
+    # with st.container():
+    #     st.write('---')
+    #     st.header('Contact Me')
+    #     # Documention: https://formsubmit.co/
+    #     contact_form = """
+    #     <form action="https://formsubmit.co/1240124885@qq.com" method="POST">
+    #         <input type="hidden" name="_captcha" value="false">
+    #         <input type="text" name="name" placeholder="Your name" required>
+    #         <input type="email" name="email" placeholder="Your email" required>
+    #         <textarea name="message" placeholder="Your message here" required></textarea>
+    #         <button type="submit">Send</button>
+    #     </form>
+    #     """
+    #     col_left, col_right = st.columns(2)
+    #     with col_left:
+    #         st.markdown(contact_form, unsafe_allow_html=True)
+    #     with col_right:
+    #         # 每个带有键的小部件都会自动添加到会话状态
+    #         st_lottie(lottie_logo, height=300, key='logo')
 
 # 通过url下载lottie中的元素
 st.cache

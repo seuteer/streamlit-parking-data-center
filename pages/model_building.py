@@ -17,7 +17,7 @@ import streamlit.components.v1 as components
 
 
 def app():
-    st.title('Model Building')
+    st.header('停车占有率预测')
     st.session_state.info_st.success("停车占有率预测模型构建👉")
 
     # 定义全局变量
@@ -32,8 +32,8 @@ def app():
     st.subheader("数据预处理")
     train_dataset, train_labels, test_dataset, test_labels, train_batch_dataset, test_batch_dataset = preprocess(data, locations, col)
 
-    st.write("---")
-    st.subheader("模型训练")
+    # st.write("---")
+    # st.subheader("模型训练")
     training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
 
     # st.write("---")
@@ -49,8 +49,8 @@ def app():
     labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
     lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
     m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Test data', index_steps=5).add_to(m.m1)
-    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Pred data', index_steps=5).add_to(m.m2)
+    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='原始数据', index_steps=5).add_to(m.m1)
+    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='预测数据', index_steps=5).add_to(m.m2)
     folium.LayerControl(collapsed=False).add_to(m)
     m.save(os.path.join(st.session_state.data_output, 'map.html'))
     map_html = open(os.path.join(st.session_state.data_output, 'map.html'),"r",encoding='utf-8').read()
@@ -62,18 +62,18 @@ def preprocess(data, locations, col):
     SEQ_LEN = 18  # 8:00 - 16:30 的数据长度
     batch_size = 32
 
-    temp = st.info("划分特征和标签")
+    # temp = st.info("划分特征和标签")
     X = data
     y = data.loc[:, data.columns == col]
-    st.write('特征维度(时间序列长度, 停车场数据): ', X.shape)
-    st.write('标签维度(时间序列长度, 1): ', y.shape)
+    # st.write('特征维度(时间序列长度, 停车场数据): ', X.shape)
+    # st.write('标签维度(时间序列长度, 1): ', y.shape)
     Spatialweight = locations[col]
-    st.write(col, '停车场的空间权重：', pd.DataFrame(Spatialweight).T)
+    # st.write(col, '停车场的空间权重：', pd.DataFrame(Spatialweight).T)
     X = X.mul(list(Spatialweight))
-    temp.success("划分特征和标签")
+    # temp.success("划分特征和标签")
 
-    temp = st.info("划分训练集和测试集")
-    st.write('训练集占比: ', train_ratio)
+    # temp = st.info("划分训练集和测试集")
+    # st.write('训练集占比: ', train_ratio)
     Xtrain, Xtest, Ytrain, Ytest = split_dataset(X, y, train_ratio=train_ratio)
     altdata = data.reset_index()
     altdata['index'] = altdata.index
@@ -82,28 +82,28 @@ def preprocess(data, locations, col):
         x='index:Q',
         y=f'{col}:Q',
         color=alt.Color('train_valid:N', legend=None),
-    ).interactive()
+    )
     st.altair_chart(line, use_container_width=True)
-    temp.success("划分训练集和测试集")
+    # temp.success("划分训练集和测试集")
 
-    temp = st.info("构造时间序列数据集并进行批处理")
-    st.write('LSTM 滑动窗口长度: ', SEQ_LEN)
-    st.write('批处理的batch_size: ', batch_size)
+    # temp = st.info("构造时间序列数据集并进行批处理")
+    # st.write('LSTM 滑动窗口长度: ', SEQ_LEN)
+    # st.write('批处理的batch_size: ', batch_size)
     train_dataset, train_labels = create_dataset(Xtrain, Ytrain, seq_len=SEQ_LEN)
     test_dataset, test_labels = create_dataset(Xtest, Ytest, seq_len=SEQ_LEN)
-    st.write('时间序列特征维度(训练集长度, 滑动窗口长度, 特征维度): ', train_dataset.shape)
-    st.write('时间序列标签维度(训练集长度, 标签维度): ', train_labels.shape)
+    # st.write('时间序列特征维度(训练集长度, 滑动窗口长度, 特征维度): ', train_dataset.shape)
+    # st.write('时间序列标签维度(训练集长度, 标签维度): ', train_labels.shape)
     train_batch_dataset = create_batch_dataset(train_dataset, train_labels, batch_size=batch_size)
     test_batch_dataset = create_batch_dataset(test_dataset, test_labels, train=False, batch_size=batch_size)
-    st.write("构建批数据的目的是加速模型训练。")
-    temp.success("构造时间序列数据集并进行批处理")
+    # st.write("构建批数据的目的是加速模型训练。")
+    # temp.success("构造时间序列数据集并进行批处理")
     return train_dataset, train_labels, test_dataset, test_labels, train_batch_dataset, test_batch_dataset
 
 def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30):
     if os.path.exists(os.path.join('./data/output/models/', col)):
-        temp = st.info('模型正在从云端加载...')
+        # temp = st.info('模型正在从云端加载...')
         model = tf.keras.models.load_model(os.path.join('./data/output/models/', col))
-        temp.success('模型及权重已成功加载！')
+        # temp.success('模型及权重已成功加载！')
     else:
         temp = st.info('训练 LSTM 神经网络...')
         model = keras.Sequential([
@@ -114,9 +114,9 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
         ])
         log_dir=f"./data/output/logs/fit/{col}/" + (datetime.datetime.now()+ datetime.timedelta(hours=8)).strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        st.write('模型优化函数: adam')
-        st.write('模型损失函数: mse')
-        st.write('模型训练轮次: ', epochs)
+        # st.write('模型优化函数: adam')
+        # st.write('模型损失函数: mse')
+        # st.write('模型训练轮次: ', epochs)
         model.compile(optimizer='adam', loss="mse")
         history = model.fit(train_batch_dataset,
             epochs=epochs,

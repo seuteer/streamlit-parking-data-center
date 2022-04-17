@@ -29,10 +29,10 @@ st.session_state.info_st = st.sidebar.empty()  # 侧边栏的提示信息
 app = MultiPage()
 
 # 添加页面
-app.add_page('Home', home.app)
-app.add_page("Geographic Data", data_geographic.app)
-app.add_page('Parking Data', data_parking.app)
-app.add_page('Building Model', model_building.app)
+app.add_page('主页', home.app)
+app.add_page('空间特征分析', data_geographic.app)
+app.add_page('时间序列分析', data_parking.app)
+app.add_page('停车占有率预测', model_building.app)
 
 # Run
 app.run()
