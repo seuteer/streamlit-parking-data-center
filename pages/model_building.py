@@ -36,9 +36,9 @@ def app():
     st.subheader("模型训练")
     training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
 
-    st.write("---")
-    st.subheader("模型评估")
-    evaluate()
+    # st.write("---")
+    # st.subheader("模型评估")
+    # evaluate()
 
     st.write("---")
     st.subheader("模型预测")
@@ -49,8 +49,8 @@ def app():
     labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
     lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
     m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Test data').add_to(m.m1)
-    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Pred data').add_to(m.m2)
+    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Test data', index_steps=5).add_to(m.m1)
+    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Pred data', index_steps=5).add_to(m.m2)
     folium.LayerControl(collapsed=False).add_to(m)
     m.save(os.path.join(st.session_state.data_output, 'map.html'))
     map_html = open(os.path.join(st.session_state.data_output, 'map.html'),"r",encoding='utf-8').read()
@@ -243,4 +243,7 @@ def plot_HeatMapWithTime(locations):
             ])
         labels_list.append(parking_labels_list)
         pred_list.append(parking_pred_list)
+    # 间隔5个取值，达到间隔5帧播放的效果
+    labels_list = labels_list[0:len(labels_list):5]
+    pred_list = pred_list[0:len(pred_list):5]
     return labels_list, pred_list
