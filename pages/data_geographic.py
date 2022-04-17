@@ -163,7 +163,7 @@ def plot_leafmap(dict_layer_gdf):
             # 列出所有图层
             list(dict_layer_gdf.keys()),
             # 默认首选的元素
-            ['parking', 'pois', 'buildings', 'edges']
+            list(dict_layer_gdf.keys())
         )
         temp.success(f"您添加了 {layer_list[-1]} 图层" if len(layer_list) else '请选择图层')
     with row1_col1:
@@ -182,7 +182,7 @@ def plot_leafmap(dict_layer_gdf):
             elif layer == 'nodes':
                 nodes = dict_layer_gdf['nodes']
                 nodes['street_count'] = nodes['street_count'].astype(dtype="int8")  # 此处会改变输出结果的值，我们是允许的
-                colormap = branca.colormap.LinearColormap(
+                colormap_node = branca.colormap.LinearColormap(
                     vmin=nodes['street_count'].min(),  
                     vmax=nodes['street_count'].max(),
                     colors=['green','red'],
@@ -190,8 +190,8 @@ def plot_leafmap(dict_layer_gdf):
                 m.add_gdf(  # 继承 folium.GeoJSON 类的参数
                     dict_layer_gdf['nodes'],
                     popup=folium.GeoJsonPopup(fields=['street_count'], aliases=['街道连接数']),  # GeoJsonPopup
-                    marker=folium.CircleMarker(radius=2),  # Circle, CircleMarker or Marker
-                    style_callback=lambda x: {"color": colormap(x["properties"]["street_count"]),},
+                    marker=folium.CircleMarker(radius=1),  # Circle, CircleMarker or Marker
+                    style_callback=lambda x: {"color": colormap_node(x["properties"]["street_count"]),},
                     hover_style={"color": 'gray'},
                     layer_name='nodes',
                     zoom_to_layer=False,
@@ -209,7 +209,7 @@ def plot_leafmap(dict_layer_gdf):
                 edges['edge_centrality'] = round(edges['edge_centrality'].astype(dtype="float64"), 5)  # 此处会改变输出结果的值，我们是允许的
                 edges['length'] = round(edges['length'].astype(dtype="float64"), 1)
                 edges['lanes'] = edges['lanes'].apply(lambda x: x if x!='nan' else 1)
-                colormap = branca.colormap.LinearColormap(
+                colormap_edge = branca.colormap.LinearColormap(
                     vmin=edges['edge_centrality'].quantile(0.0),  # 0分位数
                     vmax=edges['edge_centrality'].quantile(1),  # 1分位数
                     colors=['darkgreen', 'green', 'red'],  # 调色板
@@ -217,7 +217,7 @@ def plot_leafmap(dict_layer_gdf):
                 m.add_gdf(
                     dict_layer_gdf['edges'],
                     layer_name='edges',
-                    style_callback=lambda x: {"color": colormap(x["properties"]["edge_centrality"]), "weight": x["properties"]["lanes"]},
+                    style_callback=lambda x: {"color": colormap_edge(x["properties"]["edge_centrality"]), "weight": x["properties"]["lanes"]},
                     tooltip=folium.GeoJsonTooltip(
                         fields=['name','edge_centrality','length','speed_kph','travel_time'], 
                         aliases=['道路名称','道路中心度','道路长度(m)','行驶速度(km/h)','行驶时间(s)']),
