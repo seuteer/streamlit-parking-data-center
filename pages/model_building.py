@@ -49,8 +49,8 @@ def app():
     labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
     lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
     m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='原始数据', index_steps=5).add_to(m.m1)
-    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='预测数据', index_steps=5).add_to(m.m2)
+    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='原始数据').add_to(m.m1)
+    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='预测数据').add_to(m.m2)
     folium.LayerControl(collapsed=False).add_to(m)
     m.save(os.path.join(st.session_state.data_output, 'map.html'))
     map_html = open(os.path.join(st.session_state.data_output, 'map.html'),"r",encoding='utf-8').read()
@@ -243,7 +243,7 @@ def plot_HeatMapWithTime(locations):
             ])
         labels_list.append(parking_labels_list)
         pred_list.append(parking_pred_list)
-    # 间隔5个取值，达到间隔5帧播放的效果
-    labels_list = labels_list[0:len(labels_list):5]
-    pred_list = pred_list[0:len(pred_list):5]
+    # 间隔3个取值，达到间隔3帧播放的效果
+    labels_list = labels_list[0:len(labels_list):3]
+    pred_list = pred_list[0:len(pred_list):3]
     return labels_list, pred_list
