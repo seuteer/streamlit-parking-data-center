@@ -8,7 +8,7 @@ import json  # 加载本地json文件
 
 
 def app():
-    st.header('停车占有率预测可视化数据平台')
+    st.header('停车占有率预测可视化数据中台')
 
     # 加载缓存资源
     lottie_logo,geog1,parking1,parking2,model1 = load_all_data()
