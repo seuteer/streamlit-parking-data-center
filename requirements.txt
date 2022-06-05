@@ -9,4 +9,5 @@ folium
 branca
 streamlit==1.8.1
 streamlit_lottie
-git+https://github.com/giswqs/leafmap
+leafmap==0.8.6
+# git+https://github.com/giswqs/leafmap
