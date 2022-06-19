@@ -3,7 +3,9 @@
 [share_badge]: https://static.streamlit.io/badges/streamlit_badge_black_white.svg
 [share_link]: https://share.streamlit.io/seuteer/streamlit_app_seuteer/main/app.py
 
+
 ## 资源地址
+
 https://www.webfx.com/tools/emoji-cheat-sheet/  # 表情符号字符串
 
 https://lottiefiles.com/  # 矢量元素素材网站
@@ -14,13 +16,15 @@ https://www.w3schools.com/howto/howto_css_contact_form.asp  # 表单的css代码
 
 https://share.streamlit.io/  # 云端streamlit服务器
 
-## 本地端口运行
+
+## 本地端口运行app
 
 ```shell
 streamlit run app.py
 ```
 
-## 上传到github
+
+## 上传github仓库
 
 ```shell
 git init  # 建立git仓库
@@ -31,12 +35,11 @@ git remote add origin https://github.com/seuteer/streamlit_app_seuteer.git  # �
 git push -u origin main  # 将本地文件上传到github
 ```
 
-## 更新文件
+## 更新github仓库
 
 ```shell
 git add .
-git commit -m 'v2'
-git pull origin main  # github仓库同步到本地
+git commit -m '版本号'
+# git pull origin main  # github同步到本地
 git push -u origin main  # 本地上传到github
 ```
-

@@ -7,7 +7,6 @@ osmnx
 altair
 folium
 branca
-streamlit==1.8.1
 streamlit_lottie
+streamlit==1.8.1
 leafmap==0.8.6
-# git+https://github.com/giswqs/leafmap
