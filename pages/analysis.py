@@ -1,55 +1,46 @@
-# 停车数据处理
-
 import folium
 import streamlit as st
 import pandas as pd
 import datetime
 import streamlit.components.v1 as components  # 自定义组件显示 folium,altair 的 html
 
+# 主程序
 def app():
-    st.header('时间序列分析')
-    st.session_state.info_st.success("停车场时间序列探索与分析👉")
+    st.header('Spatiotemporal Correlation Analysis')
+    st.session_state.info_st.success("Spatiotemporal Correlation Analysis of Parking Lot 👉")
 
     st.write("---")
-    st.subheader("停车场时间序列处理")
     parking_data, locations = load_data()
-    temp = st.info("加载停车场时间序列数据...")
     parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
-    temp.info('删除无空间属性停车场...')
     parking_data_create = create_or(parking_data_remove)
-    temp.info('创建停车占有率指标...')
     timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
-    temp.info('创建空间自相关指标...')
-    temp.success("数据处理完毕！")
     col1, col2 = st.columns(2)
     with col1:
-        with st.expander('原始数据：停车场时间序列+停车场空间坐标👇'):
-            st.write('停车场数据', parking_data)
-            st.write('空间坐标点', locations)
+        with st.expander('Raw data 👇'):
+            st.write('parking_data', parking_data)
+            st.write('parking_loc', locations)
     with col2:
-        with st.expander('处理数据：占有率和空间相关性的停车场数据👇'):
-            st.write('创建占有率指标', parking_data_create)
-            st.write('创建空间相关性指标', locations_create)
-            st.write('所有停车场的时间序列数据', timeSeriesFeatures)
+        with st.expander('Processed data👇'):
+            st.write('parking_data', parking_data_create)
+            st.write('parking_loc', locations_create)
+            st.write('parking_time', timeSeriesFeatures)
 
     st.write("---")
-    st.subheader("时间序列热力图分析")
-    temp = st.info("正在绘制时间序列热力图...")
-    col1, col2 = st.columns((3,1))
+    st.subheader("Dynamic heat map of parking lot occupancy")
+    temp = st.info("Plotting the time series heatmap...")
+    
     time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
     lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
     m = folium.Map(location=(lat, lon), zoom_start=14)
-    with col2:
-        radius = st.slider('请选择热力图范围：', 30, 100, 60)
+    radius = st.slider('Please select the heatmap radius:', 30, 100, 60)
     folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=radius).add_to(m)
     fig_folium = folium.Figure().add_child(m)
-    with col1:
-        components.html(html=fig_folium.render(), height=500)  # 宽度自适应
-    temp.success("时间序列热力图绘制完毕！")
+    components.html(html=fig_folium.render(), height=500)  # 宽度自适应
+    temp.success("The time series heat map is drawn!")
 
     st.write("---")
-    st.subheader("时间序列空间自相关分析")
-    st.info("您可以将鼠标悬浮到停车场附近，交互式分析停车场占有率时间序列的时空关系")
+    st.subheader("Spatiotemporal correlation of parking lot")
+    st.info("You can hover the mouse near the parking lot to interactively analyze the spatio-temporal relationship of the parking lot occupancy time series.")
     fig_altair = plot_altair(parking_data_create, locations_create)
     st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
 
@@ -58,7 +49,7 @@ def load_data():
     '''加载数据'''
     # 导入原始数据（停车占有率表+位置经纬度表）
     parking_data = pd.read_csv(st.session_state.data_input + 'birmingham.csv')
-    locations = pd.read_csv(st.session_state.data_input + 'bmh_location.csv')
+    locations = pd.read_csv(st.session_state.data_input + 'birmingham_loc.csv')
     return parking_data, locations
 
 def remove_parking_no_space(parking_data, locations):
@@ -84,7 +75,7 @@ def create_or(parking_data):
     data.reset_index(drop=True, inplace=True)
     data['LastUpdated'] = pd.to_datetime(data['LastUpdated'], format="%Y/%m/%d %H:%M")
     data.sort_values(by=['SystemCodeNumber', 'LastUpdated'], inplace=True)
-    data.to_csv(st.session_state.data_output + 'bhm_processed.csv', index=False)
+    data.to_csv(st.session_state.data_temp + 'birmingham_pro.csv', index=False)
     return data
 
 def create_rs(parking_data, locations):
@@ -105,9 +96,9 @@ def create_rs(parking_data, locations):
     # 将相关性矩阵连接到静态表，用于构建空间特征权重
     locations_processed = locations.merge(rs, on='SystemCodeNumber')
     # 保存空间表，用于构建多变量特征
-    data_space.to_csv(st.session_state.data_output + 'timeSeriesFeatures.csv')
+    data_space.to_csv(st.session_state.data_temp + 'birmingham_time_series.csv')
     # 保存静态数据
-    locations_processed.to_csv(st.session_state.data_output + 'locations_processed.csv', index=False)
+    locations_processed.to_csv(st.session_state.data_temp + 'birmingham_loc_pro.csv', index=False)
     return data_space, locations_processed
 
 def plot_altair(parking_data, locations):
@@ -194,7 +185,7 @@ def plot_altair(parking_data, locations):
 
     return fig
 
-@st.cache(suppress_st_warning=True)
+@st.cache_resource()
 def plot_folium(locations, data_space):
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
     time_list = []

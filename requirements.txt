@@ -1,3 +1,4 @@
+leafmap
 pyngrok
 scikit-learn
 tensorflow
@@ -8,5 +9,4 @@ altair
 folium
 branca
 streamlit_lottie
-streamlit==1.8.1
-leafmap==0.8.6
+streamlit

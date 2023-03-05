@@ -19,9 +19,9 @@ class MultiPage:
 
 	# 定义运行函数，当选择某页面时执行该页面
 	def run(self):
-		st.session_state.info_st.info('请点击导航栏选择不同页面👇')
+		st.session_state.info_st.info('Please click navigation bar to select different pages 👇')
 		# 使用侧边栏下拉框选择页面
-		st.sidebar.title("导航栏")
+		st.sidebar.title("navigation bar")
 		page = st.sidebar.radio(
 			label='Go To',
 			options=self.pages,
@@ -33,13 +33,12 @@ class MultiPage:
 			st.sidebar.info("""
 			This web [app](https://share.streamlit.io/seuteer/streamlit_app_seuteer/main/app.py) 
 			is maintained by **seuteer**. You can follow me on social media:
-			[GitHub](https://github.com/seuteer) | [Blog](https://seuteer.icu/)
+			[GitHub](https://github.com/seuteer) | [CSV](./data/input/birmingham.csv)
 			"""
 			)
 
 		st.sidebar.info(f"""
-		Current time {st.session_state.date_time.date()} / {st.session_state.date_time.time()}    
-		Current online {st.session_state.current_persons} persons
+		Current time {st.session_state.date_time.date()} / {st.session_state.date_time.time()}
 		"""
 		)
 
