@@ -13,25 +13,8 @@ import leafmap.foliumap as leafmap
 # 设置geemap环境变量
 os.environ["EARTHENGINE_TOKEN"] = st.secrets["EARTHENGINE_TOKEN"]
 
-# 主程序
-def app():
-    st.header('Geographic Data Visualization')
-    st.session_state.info_st.success("Geographic data acquisition and visualization 👉")
 
-    st.write("---")
-    st.subheader("geographic data visualization")
-    temp = st.info("Loading cloud data...")
-    dict_layer_gdf = get_geometry_data(
-        parking_file=st.session_state.data_input+'birmingham_loc.csv',
-        gpkg_file=st.session_state.data_temp+'birmingham.gpkg',
-        place='Birmingham, UK',
-        tif_file=st.session_state.data_input+'birmingham_dem.tif',
-    )
-    temp.success("Cloud data loaded!")
-    plot_leafmap(dict_layer_gdf)
-
-
-@st.cache_data()
+@st.cache_data
 def get_geometry_data(parking_file, gpkg_file, place=None, tif_file=None):
     """
     根据停车场经纬度坐标点，获取周边道路网、POI、建筑足迹（From OpenStreetMap）
@@ -103,7 +86,6 @@ def get_geometry_data(parking_file, gpkg_file, place=None, tif_file=None):
     for layer in ['parking_lot', 'pois', 'buildings', 'nodes', 'edges']:
         dict_layer_gdf[layer] = gpd.read_file(gpkg_file, layer=layer)
     return dict_layer_gdf
-
 
 def plot_leafmap(dict_layer_gdf):
     row1_col1, row1_col2 = st.columns([1, 1])
@@ -186,3 +168,22 @@ def plot_leafmap(dict_layer_gdf):
             )
     folium.LayerControl(collapsed=False).add_to(m)
     m.to_streamlit(height=500)
+
+
+def app():
+    st.header('Geographic Data Visualization')
+    st.session_state.info_st.success("Geographic data acquisition and visualization 👉")
+
+    st.write("---")
+    st.subheader("geographic data visualization")
+    temp = st.info("Loading cloud data...")
+    dict_layer_gdf = get_geometry_data(
+        parking_file=st.session_state.data_input+'birmingham_loc.csv',
+        gpkg_file=st.session_state.data_temp+'birmingham.gpkg',
+        place='Birmingham, UK',
+        tif_file=st.session_state.data_input+'birmingham_dem.tif',
+    )
+    temp.success("Cloud data loaded!")
+    plot_leafmap(dict_layer_gdf)
+
+app()

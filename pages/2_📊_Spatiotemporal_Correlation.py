@@ -1,48 +1,9 @@
 import folium
+import folium.plugins
 import streamlit as st
 import pandas as pd
 import datetime
 import streamlit.components.v1 as components  # 自定义组件显示 folium,altair 的 html
-
-# 主程序
-def app():
-    st.header('Spatiotemporal Correlation Analysis')
-    st.session_state.info_st.success("Spatiotemporal Correlation Analysis of Parking Lot 👉")
-
-    st.write("---")
-    parking_data, locations = load_data()
-    parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
-    parking_data_create = create_or(parking_data_remove)
-    timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
-    col1, col2 = st.columns(2)
-    with col1:
-        with st.expander('Raw data 👇'):
-            st.write('parking_data', parking_data)
-            st.write('parking_loc', locations)
-    with col2:
-        with st.expander('Processed data👇'):
-            st.write('parking_data', parking_data_create)
-            st.write('parking_loc', locations_create)
-            st.write('parking_time', timeSeriesFeatures)
-
-    st.write("---")
-    st.subheader("Dynamic heat map of parking lot occupancy")
-    temp = st.info("Plotting the time series heatmap...")
-    
-    time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
-    lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
-    m = folium.Map(location=(lat, lon), zoom_start=14)
-    radius = st.slider('Please select the heatmap radius:', 30, 100, 60)
-    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=radius).add_to(m)
-    fig_folium = folium.Figure().add_child(m)
-    components.html(html=fig_folium.render(), height=500)  # 宽度自适应
-    temp.success("The time series heat map is drawn!")
-
-    st.write("---")
-    st.subheader("Spatiotemporal correlation of parking lot")
-    st.info("You can hover the mouse near the parking lot to interactively analyze the spatio-temporal relationship of the parking lot occupancy time series.")
-    fig_altair = plot_altair(parking_data_create, locations_create)
-    st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
 
 
 def load_data():
@@ -185,7 +146,7 @@ def plot_altair(parking_data, locations):
 
     return fig
 
-@st.cache_resource()
+@st.cache_data
 def plot_folium(locations, data_space):
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
     time_list = []
@@ -203,3 +164,45 @@ def plot_folium(locations, data_space):
     data_space = data_space.reset_index()
     time_index = list(data_space['LastUpdated'].astype(dtype="str"))
     return time_list, time_index
+
+
+def app():
+    st.header('Spatiotemporal Correlation Analysis')
+    st.session_state.info_st.success("Spatiotemporal Correlation Analysis of Parking Lot 👉")
+
+    st.write("---")
+    parking_data, locations = load_data()
+    parking_data_remove, locations_remove = remove_parking_no_space(parking_data, locations)
+    parking_data_create = create_or(parking_data_remove)
+    timeSeriesFeatures, locations_create = create_rs(parking_data_create, locations_remove)
+    col1, col2 = st.columns(2)
+    with col1:
+        with st.expander('Raw data 👇'):
+            st.write('parking_data', parking_data)
+            st.write('parking_loc', locations)
+    with col2:
+        with st.expander('Processed data👇'):
+            st.write('parking_data', parking_data_create)
+            st.write('parking_loc', locations_create)
+            st.write('parking_time', timeSeriesFeatures)
+
+    st.write("---")
+    st.subheader("Dynamic heat map of parking lot occupancy")
+    temp = st.info("Plotting the time series heatmap...")
+    
+    time_list, time_index = plot_folium(locations_create, timeSeriesFeatures)
+    lon, lat = locations_create['longtitude'].mean(), locations_create['latitude'].mean()
+    m = folium.Map(location=(lat, lon), zoom_start=14)
+    radius = st.slider('Please select the heatmap radius:', 30, 100, 60)
+    folium.plugins.HeatMapWithTime(data=time_list, index=time_index, auto_play=True, radius=radius).add_to(m)
+    fig_folium = folium.Figure().add_child(m)
+    components.html(html=fig_folium.render(), height=500)  # 宽度自适应
+    temp.success("The time series heat map is drawn!")
+
+    st.write("---")
+    st.subheader("Spatiotemporal correlation of parking lot")
+    st.info("You can hover the mouse near the parking lot to interactively analyze the spatio-temporal relationship of the parking lot occupancy time series.")
+    fig_altair = plot_altair(parking_data_create, locations_create)
+    st.altair_chart(fig_altair, use_container_width=True)  # fig_altair 不属于 altair.vegalite.v2.api.Chart 类型，因此没法自适应宽度
+
+app()

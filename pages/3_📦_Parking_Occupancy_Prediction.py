@@ -14,50 +14,6 @@ from sklearn.metrics import mean_squared_error as MSE
 import streamlit.components.v1 as components
 
 
-# 主程序
-def app():
-    st.header('Parking Occupancy Prediction')
-    st.session_state.info_st.success("Construction of parking occupancy prediction model 👉")
-
-    # 定义全局变量
-    data = pd.read_csv(os.path.join(st.session_state.data_temp, 'birmingham_time_series.csv'), index_col=0)
-    locations = pd.read_csv(os.path.join(st.session_state.data_temp, 'birmingham_loc_pro.csv'))
-
-    col = st.selectbox(
-        'Please select the parking lot for model training:',
-        data.columns
-        )
-
-    st.write("---")
-    st.subheader("Data preprocessing")
-    train_dataset, train_labels, test_dataset, test_labels, train_batch_dataset, test_batch_dataset = preprocess(data, locations, col)
-
-    st.write("---")
-    st.subheader("Model training")
-    training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
-
-    if not st.session_state.simplified_mode:
-        st.write("---")
-        st.subheader("Model evaluation")
-        evaluate()
-
-    st.write("---")
-    st.subheader("Model prediction")
-    prediction(col, train_dataset, train_labels, test_dataset, test_labels)
-
-    st.write('---')
-    st.subheader('Parking Occupancy Prediction Dynamic Heat Map')
-    labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
-    lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
-    m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
-    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Raw data').add_to(m.m1)
-    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Predict data').add_to(m.m2)
-    folium.LayerControl(collapsed=False).add_to(m)
-    m.save(os.path.join(st.session_state.data_output, 'birmingham.html'))
-    map_html = open(os.path.join(st.session_state.data_output, 'birmingham.html'),"r",encoding='utf-8').read()
-    components.html(html=map_html, height=500)
-
-
 def preprocess(data, locations, col):
     train_ratio = 0.8
     SEQ_LEN = 18  # 8:00 - 16:30 的数据长度
@@ -221,7 +177,7 @@ def plot_predict(Ytest, Ypred):
     st.pyplot(fig)
 
 # 创建动态热力图序列
-@st.cache_resource()
+@st.cache_data
 def plot_HeatMapWithTime(locations):
     parking_df = pd.read_pickle('./data/output/birmingham_results.pkl')
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
@@ -247,3 +203,48 @@ def plot_HeatMapWithTime(locations):
     labels_list = labels_list[0:len(labels_list):3]
     pred_list = pred_list[0:len(pred_list):3]
     return labels_list, pred_list
+
+
+def app():
+    st.header('Parking Occupancy Prediction')
+    st.session_state.info_st.success("Construction of parking occupancy prediction model 👉")
+
+    # 定义全局变量
+    data = pd.read_csv(os.path.join(st.session_state.data_temp, 'birmingham_time_series.csv'), index_col=0)
+    locations = pd.read_csv(os.path.join(st.session_state.data_temp, 'birmingham_loc_pro.csv'))
+
+    col = st.selectbox(
+        'Please select the parking lot for model training:',
+        data.columns
+        )
+
+    st.write("---")
+    st.subheader("Data preprocessing")
+    train_dataset, train_labels, test_dataset, test_labels, train_batch_dataset, test_batch_dataset = preprocess(data, locations, col)
+
+    st.write("---")
+    st.subheader("Model training")
+    training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
+
+    if not st.session_state.simplified_mode:
+        st.write("---")
+        st.subheader("Model evaluation")
+        evaluate()
+
+    st.write("---")
+    st.subheader("Model prediction")
+    prediction(col, train_dataset, train_labels, test_dataset, test_labels)
+
+    st.write('---')
+    st.subheader('Parking Occupancy Prediction Dynamic Heat Map')
+    labels_list, pred_list = plot_HeatMapWithTime(locations=locations)
+    lon, lat = locations['longtitude'].mean(), locations['latitude'].mean()
+    m = folium.plugins.DualMap(location=(lat, lon), zoom_start=14)
+    folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Raw data').add_to(m.m1)
+    folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Predict data').add_to(m.m2)
+    folium.LayerControl(collapsed=False).add_to(m)
+    m.save(os.path.join(st.session_state.data_output, 'birmingham.html'))
+    map_html = open(os.path.join(st.session_state.data_output, 'birmingham.html'),"r",encoding='utf-8').read()
+    components.html(html=map_html, height=500)
+
+app()
