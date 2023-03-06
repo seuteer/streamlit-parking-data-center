@@ -19,7 +19,8 @@ def remove_parking_no_space(parking_data, locations):
     parking_data = parking_data[parking_data['SystemCodeNumber'].isin(locations['SystemCodeNumber'])]
     SystemCodeNumber = list(set(parking_data['SystemCodeNumber']))
     # 删除时间序列过短的停车场
-    [SystemCodeNumber.remove(i) for i in ['BHMBRTARC01', 'NIA North']]
+    SystemCodeNumber.remove('BHMBRTARC01')
+    SystemCodeNumber.remove('NIA North')
     parking_data_remove = parking_data[parking_data['SystemCodeNumber'].isin(SystemCodeNumber)]
     locations_remove = locations[locations['SystemCodeNumber'].isin(SystemCodeNumber)]
     return parking_data_remove, locations_remove

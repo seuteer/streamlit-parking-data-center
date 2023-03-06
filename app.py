@@ -24,9 +24,9 @@ st.session_state.info_st.info('Please click navigation bar to select different p
 if not st.session_state.simplified_mode:
 	st.sidebar.title("About")
 	st.sidebar.info("""
-	This web [app](https://share.streamlit.io/seuteer/streamlit_app_seuteer/main/app.py) 
+	This web [app](https://parking-visualization-center.streamlit.app/) 
 	is maintained by **seuteer**. You can follow me on social media:
-	[GitHub](https://github.com/seuteer) | [CV](https://github.com/seuteer/parking-visualization-center/tree/main/images/resume.pdf)
+	[GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/d2856781071318/pdf)
 	"""
 	)
 st.sidebar.info(f"Current time {st.session_state.date_time.date()} / {st.session_state.date_time.time()}")
@@ -73,18 +73,18 @@ with st.container():
 	row1col1, row1col2 = st.columns(2)
 	with row1col1:
 		st.image(img1)
-		st.info("Geographic Data Visualization")
+		st.info("[Geographic Data Visualization](https://parking-visualization-center.streamlit.app/Geographic_Data_Visualization)")
 	with row1col2:
 		st.image(img2)
-		st.info('Temporal Correlation Analysis')
+		st.info('[Temporal Correlation Analysis](https://parking-visualization-center.streamlit.app/Spatiotemporal_Correlation)')
 
 	row2col1, row2col2 = st.columns(2)
 	with row2col1:
 		st.image(img3)
-		st.info("Spatial Correlation Analysis")
+		st.info("[Spatial Correlation Analysis](https://parking-visualization-center.streamlit.app/Spatiotemporal_Correlation)")
 	with row2col2:
 		st.image(img4)
-		st.info('Parking Occupancy Prediction')
+		st.info('[Parking Occupancy Prediction](https://parking-visualization-center.streamlit.app/Parking_Occupancy_Prediction)')
 
 if not st.session_state.simplified_mode:
 	# Part 2
