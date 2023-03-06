@@ -5,6 +5,7 @@ import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 import folium
+import folium.plugins
 import altair as alt
 import streamlit as st
 import tensorflow as tf
