@@ -12,24 +12,17 @@ st.set_page_config(
 	layout='wide',  # 页面布局
 	initial_sidebar_state='auto'  # 侧边栏
 	)
+date_time = datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(hours=8)  # 北京时间
 
-st.session_state.data_input = './data/input/'
-st.session_state.data_output = './data/output/'
-st.session_state.data_temp = './data/temp/'
-st.session_state.date_time = datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(hours=8)  # 北京时间
-st.session_state.info_st = st.sidebar.empty()  # 侧边栏的提示信息
-st.session_state.simplified_mode = False  # 简化模式
-
-st.session_state.info_st.info('Please click navigation bar to select different pages 👆')
-if not st.session_state.simplified_mode:
-	st.sidebar.title("About")
-	st.sidebar.info("""
-	This web [app](https://parking-visualization-center.streamlit.app/) 
-	is maintained by **seuteer**. You can follow me on social media:
-	[GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/d2856781071318/pdf)
-	"""
-	)
-st.sidebar.info(f"Current time {st.session_state.date_time.date()} / {st.session_state.date_time.time()}")
+st.sidebar.info('Please click navigation bar to select different pages 👆')
+st.sidebar.title("About")
+st.sidebar.info("""
+This web [app](https://parking-visualization-center.streamlit.app/) 
+is maintained by **seuteer**. You can follow me on social media:
+[GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/d2856781071318/pdf)
+"""
+)
+st.sidebar.info(f"Current time {date_time.date()} / {date_time.time()}")
 
 
 # 2.定义缓存函数
@@ -86,24 +79,23 @@ with st.container():
 		st.image(img4)
 		st.info('[Parking Occupancy Prediction](https://parking-visualization-center.streamlit.app/Parking_Occupancy_Prediction)')
 
-if not st.session_state.simplified_mode:
-	# Part 2
-	with st.container():
-		st.write('---')
-		st.header('Contact Me')
-		# Documention: https://formsubmit.co/
-		contact_form = """
-		<form action="https://formsubmit.co/1240124885@qq.com" method="POST">
-			<input type="hidden" name="_captcha" value="false">
-			<input type="text" name="name" placeholder="Your name" required>
-			<input type="email" name="email" placeholder="Your email" required>
-			<textarea name="message" placeholder="Your message here" required></textarea>
-			<button type="submit">Send</button>
-		</form>
-		"""
-		col_left, col_right = st.columns(2)
-		with col_left:
-			st.markdown(contact_form, unsafe_allow_html=True)
-		with col_right:
-			# 每个带有键的小部件都会自动添加到会话状态
-			st_lottie(lottie_logo, height=300, key='logo')
+# Part 2
+with st.container():
+	st.write('---')
+	st.header('Contact Me')
+	# Documention: https://formsubmit.co/
+	contact_form = """
+	<form action="https://formsubmit.co/1240124885@qq.com" method="POST">
+		<input type="hidden" name="_captcha" value="false">
+		<input type="text" name="name" placeholder="Your name" required>
+		<input type="email" name="email" placeholder="Your email" required>
+		<textarea name="message" placeholder="Your message here" required></textarea>
+		<button type="submit">Send</button>
+	</form>
+	"""
+	col_left, col_right = st.columns(2)
+	with col_left:
+		st.markdown(contact_form, unsafe_allow_html=True)
+	with col_right:
+		# 每个带有键的小部件都会自动添加到会话状态
+		st_lottie(lottie_logo, height=300, key='logo')

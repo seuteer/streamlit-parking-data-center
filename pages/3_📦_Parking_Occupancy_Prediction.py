@@ -107,13 +107,13 @@ def evaluate():
         components.iframe(ngrok.get_tunnels()[0].public_url, height=600, scrolling=True)
     if len(ngrok.get_tunnels()) >= 2:
         # 若网页数量大于2，则清空网页
-        st.session_state.info_st.info('TensorBoard failed to start, please refresh the page and try again!')
+        st.sidebar.info('TensorBoard failed to start, please refresh the page and try again!')
         for i in ngrok.get_tunnels():
             ngrok.disconnect(i.public_url)
 
 def prediction(col, train_dataset, train_labels, test_dataset, test_labels):
     if not os.path.exists(os.path.join('./data/output/models/', col)):
-        st.session_state.info_st.error("Model file not found, please retrain the model!")
+        st.sidebar.error("Model file not found, please retrain the model!")
     else:
         model = tf.keras.models.load_model(os.path.join('./data/output/models/', col))
         col1, col2 = st.columns(2)
@@ -207,11 +207,11 @@ def plot_HeatMapWithTime(locations):
 
 def app():
     st.header('Parking Occupancy Prediction')
-    st.session_state.info_st.success("Construction of parking occupancy prediction model 👉")
+    st.sidebar.success("Construction of parking occupancy prediction model 👉")
 
     # 定义全局变量
-    data = pd.read_csv(os.path.join(st.session_state.data_temp, 'birmingham_time_series.csv'), index_col=0)
-    locations = pd.read_csv(os.path.join(st.session_state.data_temp, 'birmingham_loc_pro.csv'))
+    data = pd.read_csv(os.path.join('./data/temp/', 'birmingham_time_series.csv'), index_col=0)
+    locations = pd.read_csv(os.path.join('./data/temp/', 'birmingham_loc_pro.csv'))
 
     col = st.selectbox(
         'Please select the parking lot for model training:',
@@ -226,10 +226,9 @@ def app():
     st.subheader("Model training")
     training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs=30)
 
-    if not st.session_state.simplified_mode:
-        st.write("---")
-        st.subheader("Model evaluation")
-        evaluate()
+    st.write("---")
+    st.subheader("Model evaluation")
+    evaluate()
 
     st.write("---")
     st.subheader("Model prediction")
@@ -243,8 +242,8 @@ def app():
     folium.plugins.HeatMapWithTime(data=labels_list,auto_play=True, radius=60, display_index=False, name='Raw data').add_to(m.m1)
     folium.plugins.HeatMapWithTime(data=pred_list, auto_play=True, radius=60, display_index=False, name='Predict data').add_to(m.m2)
     folium.LayerControl(collapsed=False).add_to(m)
-    m.save(os.path.join(st.session_state.data_output, 'birmingham.html'))
-    map_html = open(os.path.join(st.session_state.data_output, 'birmingham.html'),"r",encoding='utf-8').read()
+    m.save(os.path.join('./data/output/', 'birmingham.html'))
+    map_html = open(os.path.join('./data/output/', 'birmingham.html'),"r",encoding='utf-8').read()
     components.html(html=map_html, height=500)
 
 app()

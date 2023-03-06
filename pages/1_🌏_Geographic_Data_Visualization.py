@@ -172,16 +172,16 @@ def plot_leafmap(dict_layer_gdf):
 
 def app():
     st.header('Geographic Data Visualization')
-    st.session_state.info_st.success("Geographic data acquisition and visualization 👉")
+    st.sidebar.success("Geographic data acquisition and visualization 👉")
 
     st.write("---")
     st.subheader("geographic data visualization")
     temp = st.info("Loading cloud data...")
     dict_layer_gdf = get_geometry_data(
-        parking_file=st.session_state.data_input+'birmingham_loc.csv',
-        gpkg_file=st.session_state.data_temp+'birmingham.gpkg',
+        parking_file='./data/input/'+'birmingham_loc.csv',
+        gpkg_file='./data/temp/'+'birmingham.gpkg',
         place='Birmingham, UK',
-        tif_file=st.session_state.data_input+'birmingham_dem.tif',
+        tif_file='./data/input/'+'birmingham_dem.tif',
     )
     temp.success("Cloud data loaded!")
     plot_leafmap(dict_layer_gdf)
