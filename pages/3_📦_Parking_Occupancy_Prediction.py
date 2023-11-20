@@ -223,7 +223,7 @@ def plot_HeatMapWithTime(locations):
     SystemCodeNumber = locations['SystemCodeNumber'].unique()
     labels_list = []
     pred_list = []
-    for time_id in range(len(parking_df.loc['Ytest'][0])):
+    for time_id in range(len(parking_df.loc['test_labels'][0])):
         parking_labels_list = []
         parking_pred_list = []
         for parking_id in SystemCodeNumber:
@@ -232,14 +232,14 @@ def plot_HeatMapWithTime(locations):
                               == parking_id, 'latitude'].values[0],
                 locations.loc[locations['SystemCodeNumber']
                               == parking_id, 'longtitude'].values[0],
-                parking_df.loc['Ytest', parking_id][time_id]
+                parking_df.loc['test_labels', parking_id][time_id]
             ])
             parking_pred_list.append([
                 locations.loc[locations['SystemCodeNumber']
                               == parking_id, 'latitude'].values[0],
                 locations.loc[locations['SystemCodeNumber']
                               == parking_id, 'longtitude'].values[0],
-                parking_df.loc['Ypred', parking_id][time_id][0]
+                parking_df.loc['test_pred', parking_id][time_id][0]
             ])
         labels_list.append(parking_labels_list)
         pred_list.append(parking_pred_list)
