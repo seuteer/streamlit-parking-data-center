@@ -17,8 +17,7 @@ date_time = datetime.datetime.now().replace(microsecond=0) + datetime.timedelta(
 st.sidebar.info('Please click navigation bar to select different pages 👆')
 st.sidebar.title("About")
 st.sidebar.info("""
-This web [app](https://parking-visualization-center.streamlit.app/) 
-is maintained by **seuteer**. You can follow me on [GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/a2857004723555/pdf)
+This streamlit app is maintained by **seuteer**. You can follow me on [GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/a2857004723555/pdf)
 """
 )
 st.sidebar.info(f"Current time {date_time.date()} / {date_time.time()}")
