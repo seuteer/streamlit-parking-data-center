@@ -52,7 +52,8 @@ def preprocess(data, locations, col):
     train_dataset, train_labels = create_dataset(
         Xtrain, Ytrain, seq_len=SEQ_LEN)
     test_dataset, test_labels = create_dataset(Xtest, Ytest, seq_len=SEQ_LEN)
-    st.write('Time series feature dimension (training set length, sliding window length, feature dimension): ', train_dataset.shape)
+    st.write('Time series feature dimension (training set length, sliding window length, feature dimension): ',
+             train_dataset.shape)
     st.write('Time series label dimension (training set length, label dimension): ',
              train_labels.shape)
     train_batch_dataset = create_batch_dataset(
@@ -80,7 +81,7 @@ def training(col, train_dataset, train_batch_dataset, test_batch_dataset, epochs
             keras.layers.Dense(1)  # 全连接层，输出为1
         ])
         log_dir = f"./data/output/logs/fit/{col}/" + (
-            datetime.datetime.now() + datetime.timedelta(hours=8)).strftime("%Y%m%d-%H%M%S")
+                datetime.datetime.now() + datetime.timedelta(hours=8)).strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(
             log_dir=log_dir, histogram_freq=1)
         st.write('Model optimization function: adam')
@@ -124,7 +125,7 @@ def evaluate():
         # 若已有网页，则直接获取网页
         st.write('Visit website: ', ngrok.get_tunnels()[0].public_url)
         components.iframe(ngrok.get_tunnels()[
-                          0].public_url, height=600, scrolling=True)
+                              0].public_url, height=600, scrolling=True)
     if len(ngrok.get_tunnels()) >= 2:
         # 若网页数量大于2，则清空网页
         st.sidebar.info(
@@ -149,6 +150,7 @@ def prediction(col, train_dataset, train_labels, test_dataset, test_labels):
             test_pred = model.predict(test_dataset)
             plot_predict(test_labels, test_pred)
 
+
 # 划分训练集和测试集
 
 
@@ -170,6 +172,7 @@ def split_dataset(X, y, train_ratio=0.8):
     # 返回值
     return X_train, X_test, y_train, y_test
 
+
 # 构造时间序列数据集
 
 
@@ -177,12 +180,13 @@ def create_dataset(X, y, seq_len=10):
     features = []
     targets = []
     for i in range(0, len(X) - seq_len, 1):
-        data = X.iloc[i:i+seq_len]  # 序列数据（长度为seq_len的向量）
-        label = y.iloc[i+seq_len]  # 标签数据（长度为1）
+        data = X.iloc[i:i + seq_len]  # 序列数据（长度为seq_len的向量）
+        label = y.iloc[i + seq_len]  # 标签数据（长度为1）
         # 保存到features和labels
         features.append(data)
         targets.append(label)
     return np.array(features), np.array(targets)
+
 
 # 构造批训练数据，用于加速训练（注意区别训练集和测试集）
 
@@ -194,6 +198,7 @@ def create_batch_dataset(X, y, train=True, buffer_size=100, batch_size=32):
         return batch_data.cache().shuffle(buffer_size).batch(batch_size)
     else:  # 测试集
         return batch_data.batch(batch_size)
+
 
 # 绘制误差曲线
 
@@ -207,6 +212,7 @@ def plot_predict(Ytest, Ypred):
     plt.plot(range(len(Ytest)), Ypred, c='b', label='Pred')
     plt.legend(fontsize=10)
     st.pyplot(fig)
+
 
 # 创建动态热力图序列
 
@@ -268,9 +274,12 @@ def app():
     training(col, train_dataset, train_batch_dataset,
              test_batch_dataset, epochs=30)
 
-    st.write("---")
-    st.subheader("Model evaluation")
-    evaluate()
+    try:
+        st.write("---")
+        st.subheader("Model evaluation")
+        evaluate()
+    except:
+        pass
 
     st.write("---")
     st.subheader("Model prediction")
@@ -288,7 +297,7 @@ def app():
     folium.LayerControl(collapsed=False).add_to(m)
     m.save(os.path.join('./data/output/', 'birmingham.html'))
     map_html = open(os.path.join('./data/output/',
-                    'birmingham.html'), "r", encoding='utf-8').read()
+                                 'birmingham.html'), "r", encoding='utf-8').read()
     components.html(html=map_html, height=500)
 
 

@@ -18,7 +18,7 @@ st.sidebar.info('Please click navigation bar to select different pages 👆')
 st.sidebar.title("About")
 st.sidebar.info("""
 This web [app](https://parking-visualization-center.streamlit.app/) 
-is maintained by **seuteer**. You can follow me on [GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/d2856781071318/pdf)
+is maintained by **seuteer**. You can follow me on [GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/a2977004635856/pdf)
 """
 )
 st.sidebar.info(f"Current time {date_time.date()} / {date_time.time()}")
