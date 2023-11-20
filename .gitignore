@@ -9,6 +9,7 @@ __pycache__/
 # *.html
 private/
 .vscode/
+.idea/
 
 # C extensions
 *.so
