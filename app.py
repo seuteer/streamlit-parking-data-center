@@ -65,18 +65,18 @@ with st.container():
 	row1col1, row1col2 = st.columns(2)
 	with row1col1:
 		st.image(img1)
-		st.info("[Geographic Data Visualization](https://parking-visualization-center.streamlit.app/Geographic_Data_Visualization)")
+		st.info("[Geographic Data Visualization](https://parking-data-center.streamlit.app/Geographic_Data_Visualization)")
 	with row1col2:
 		st.image(img2)
-		st.info('[Temporal Correlation Analysis](https://parking-visualization-center.streamlit.app/Spatiotemporal_Correlation)')
+		st.info('[Temporal Correlation Analysis](https://parking-data-center.streamlit.app/Spatiotemporal_Correlation)')
 
 	row2col1, row2col2 = st.columns(2)
 	with row2col1:
 		st.image(img3)
-		st.info("[Spatial Correlation Analysis](https://parking-visualization-center.streamlit.app/Spatiotemporal_Correlation)")
+		st.info("[Spatial Correlation Analysis](https://parking-data-center.streamlit.app/Spatiotemporal_Correlation)")
 	with row2col2:
 		st.image(img4)
-		st.info('[Parking Occupancy Prediction](https://parking-visualization-center.streamlit.app/Parking_Occupancy_Prediction)')
+		st.info('[Parking Occupancy Prediction](https://parking-data-center.streamlit.app/Parking_Occupancy_Prediction)')
 
 # Part 2
 with st.container():

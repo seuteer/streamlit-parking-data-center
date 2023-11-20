@@ -1,5 +1,5 @@
 leafmap
-pyngrok==5.2.0
+pyngrok
 scikit-learn
 tensorflow
 tensorboard
