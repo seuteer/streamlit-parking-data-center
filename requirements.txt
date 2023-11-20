@@ -2,6 +2,7 @@ leafmap
 pyngrok
 scikit-learn
 tensorflow
+tensorboard
 geopandas
 networkx
 osmnx
