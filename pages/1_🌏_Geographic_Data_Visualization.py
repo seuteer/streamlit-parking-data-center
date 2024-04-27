@@ -108,7 +108,7 @@ def plot_leafmap(dict_layer_gdf):
     # 制作地图
     m = leafmap.Map()
     m.add_basemap(basemap=basemap)
-    m.zoom_to_gdf(dict_layer_gdf['nodes'])
+    m.zoom_to_gdf(dict_layer_gdf['edges'])
     for layer in layer_list:
         parking_lot = dict_layer_gdf['parking_lot']
         if layer == 'parking_lot':

@@ -18,7 +18,7 @@ st.sidebar.info('Please click navigation bar to select different pages 👆')
 st.sidebar.title("About")
 st.sidebar.info("""
 This streamlit app is maintained by **seuteer**. 
-You can follow me on [GitHub](https://github.com/seuteer) | [CV](https://maifile.cn/est/a2857004723555/pdf)
+You can follow me on [GitHub](https://github.com/seuteer)
 """
 )
 st.sidebar.info(f"Current time {date_time.date()} / {date_time.time()}")
